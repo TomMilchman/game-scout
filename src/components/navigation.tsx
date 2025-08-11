@@ -18,18 +18,6 @@ export const Navigation = () => {
                         </h1>
                     </div>
                     <div className="flex items-center gap-4">
-                        <SignedOut>
-                            <SignInButton mode="modal">
-                                <button className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700 cursor-pointer">
-                                    Sign In
-                                </button>
-                            </SignInButton>
-                            <SignUpButton mode="modal">
-                                <button className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700 cursor-pointer">
-                                    Sign Up
-                                </button>
-                            </SignUpButton>
-                        </SignedOut>
                         <SignedIn>
                             <SignOutButton>
                                 <button className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700 cursor-pointer">

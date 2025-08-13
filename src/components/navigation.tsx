@@ -1,11 +1,4 @@
-import {
-    SignInButton,
-    SignOutButton,
-    SignUpButton,
-    UserButton,
-    SignedIn,
-    SignedOut,
-} from "@clerk/nextjs";
+import { SignOutButton, UserButton, SignedIn } from "@clerk/nextjs";
 
 export const Navigation = () => {
     return (

@@ -8,6 +8,13 @@
       "when": 1754910426694,
       "tag": "0000_burly_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1755163172708,
+      "tag": "0001_skinny_grim_reaper",
+      "breakpoints": true
     }
   ]
 }

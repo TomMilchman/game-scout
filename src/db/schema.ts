@@ -19,7 +19,7 @@ export const statusEnum = pgEnum("status", [
 
 export const games = pgTable("games", {
     id: serial("id").primaryKey(),
-    steam_app_id: integer("steam_app_id"),
+    steam_app_id: integer("steam_app_id").unique(),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
     releaseDate: timestamp("release_date"),

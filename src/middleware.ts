@@ -4,10 +4,6 @@ import { NextResponse } from "next/server";
 const isProtectedRoute = createRouteMatcher(["/dashboard"]);
 
 export default clerkMiddleware(async (auth, req) => {
-    if (process.env.SKIP_AUTH === "true") {
-        return NextResponse.next();
-    }
-
     const { userId, redirectToSignIn } = await auth();
 
     if (req.nextUrl.pathname.startsWith("/api") && !userId) {

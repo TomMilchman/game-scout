@@ -4,18 +4,19 @@ CREATE TABLE "games" (
 	"steam_app_id" integer,
 	"title" varchar(255) NOT NULL,
 	"description" text,
-	"release_date" timestamp
+	"release_date" timestamp,
+	CONSTRAINT "games_steam_app_id_unique" UNIQUE("steam_app_id")
 );
 --> statement-breakpoint
 CREATE TABLE "user_games" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" integer,
+	"user_id" varchar,
 	"game_id" integer,
 	"status" "status" NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" varchar(100) PRIMARY KEY NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"name" varchar(255)
 );

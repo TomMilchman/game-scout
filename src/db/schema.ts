@@ -26,14 +26,14 @@ export const games = pgTable("games", {
 });
 
 export const users = pgTable("users", {
-    id: serial("id").primaryKey(),
+    id: varchar("id", { length: 100 }).primaryKey(),
     email: varchar("email", { length: 255 }).notNull(),
-    name: varchar("name", { length: 255 }),
+    username: varchar("username", { length: 255 }),
 });
 
 export const userGames = pgTable("user_games", {
     id: serial("id").primaryKey(),
-    userId: integer("user_id").references(() => users.id),
+    userId: varchar("user_id").references(() => users.id),
     gameId: integer("game_id").references(() => games.id),
     status: statusEnum("status").notNull(),
 });

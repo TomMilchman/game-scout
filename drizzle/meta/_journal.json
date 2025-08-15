@@ -15,6 +15,27 @@
       "when": 1755170110292,
       "tag": "0001_yielding_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1755259607396,
+      "tag": "0002_silky_famine",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1755264106667,
+      "tag": "0003_sparkling_betty_brant",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1755266639354,
+      "tag": "0004_smiling_lenny_balinger",
+      "breakpoints": true
     }
   ]
 }

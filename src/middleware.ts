@@ -1,8 +1,8 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { jsonError } from "./app/utils/apiUtils";
 
-// Define which routes are public and which are webhook endpoints
-const isPublicRoute = createRouteMatcher(["/", "/about", "/login"]);
+const isPublicRoute = createRouteMatcher(["/", "/about", "/auth/(.*)"]);
 const isWebhookRoute = createRouteMatcher(["/api/webhooks(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -13,7 +13,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     // API route protection
     if (!userId && req.nextUrl.pathname.startsWith("/api")) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        return jsonError("Unauthorized", 401);
     }
 
     // Page route protection

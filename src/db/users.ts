@@ -13,3 +13,8 @@ export async function createUser(userDetails: UserDetails) {
         ON CONFLICT (id) DO NOTHING
     `;
 }
+
+export async function deleteUser(id: string) {
+    await sql`
+        DELETE FROM users WHERE id=${id}`;
+}

@@ -6,6 +6,7 @@ import {
     varchar,
     integer,
     pgEnum,
+    unique,
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -31,9 +32,15 @@ export const users = pgTable("users", {
     username: varchar("username", { length: 255 }),
 });
 
-export const userGames = pgTable("user_games", {
-    id: serial("id").primaryKey(),
-    userId: varchar("user_id").references(() => users.id),
-    gameId: integer("game_id").references(() => games.id),
-    status: statusEnum("status").notNull(),
-});
+export const userGames = pgTable(
+    "user_games",
+    {
+        id: serial("id").primaryKey(),
+        userId: varchar("user_id").references(() => users.id, {
+            onDelete: "cascade",
+        }),
+        gameId: integer("game_id").references(() => games.id),
+        status: statusEnum("status").notNull().default("never-played"),
+    },
+    (table) => [unique("unique_user_game").on(table.userId, table.gameId)]
+);

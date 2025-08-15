@@ -1,0 +1,1 @@
+ALTER TABLE "user_games" ALTER COLUMN "status" SET DEFAULT 'never-played';

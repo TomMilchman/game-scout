@@ -19,7 +19,7 @@ export async function scrapeSteamGameIds(
         const gameIds: (string | null)[] = await page.evaluate((limit) => {
             const items = Array.from(
                 document.querySelectorAll("a.search_result_row")
-            ).slice(0, limit);
+            ).slice(0, limit + 1);
 
             return items.map((item) => {
                 const href = (item as HTMLAnchorElement).href;

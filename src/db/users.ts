@@ -6,7 +6,7 @@ type UserDetails = {
     email: string;
 };
 
-export async function addUser(userDetails: UserDetails) {
+export async function createUser(userDetails: UserDetails) {
     await sql`
         INSERT INTO users (id, email, username)
         VALUES (${userDetails.id}, ${userDetails.email}, ${userDetails.username})

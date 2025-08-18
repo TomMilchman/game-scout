@@ -2,12 +2,10 @@ import { countGamesByQuery, searchGamesByName, upsertGames } from "@/db/games";
 import { scrapeSteamSearch } from "@/services/scrapers/steamScraper";
 import { steam } from "@/lib/steam";
 import { getCachedQuery, upsertCachedQuery } from "@/db/cached_queries";
+import { normalizeQuery } from "@/utils/generalUtils";
 
 export async function getGames(query: string, userId: string, limit = 10) {
-    query = query
-        .trim()
-        .toLowerCase()
-        .replace(/[^\w\s]/g, "");
+    query = normalizeQuery(query);
     let games = await searchGamesByName(query, userId, limit);
     const currentCount = games.length;
 

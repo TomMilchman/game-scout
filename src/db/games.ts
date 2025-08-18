@@ -5,11 +5,11 @@ import { Game } from "@/app/types";
 const normalize = (gameName: string) => gameName.replace(/[\s-]+/g, "%");
 
 export async function searchGamesByName(
-    gameName: string,
+    query: string,
     userId: string,
     limit: number
 ) {
-    const normalized = normalize(gameName);
+    const normalized = normalize(query);
 
     return (await sql`
         SELECT g.*, ug.status
@@ -42,10 +42,12 @@ export async function upsertGames(games: GameDetails[]) {
 }
 
 export async function countGamesByQuery(query: string): Promise<number> {
+    const normalized = normalize(query);
+
     const result = await sql`
         SELECT COUNT(*)::int AS count
         FROM games
-        WHERE title ILIKE ${`%${query}%`}
+        WHERE title ILIKE ${`%${normalized}%`}
     `;
 
     return result[0]?.count ?? 0;

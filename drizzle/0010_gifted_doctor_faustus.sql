@@ -1,0 +1,1 @@
+ALTER TABLE "cached_queries" ADD COLUMN "total_games" integer DEFAULT 0 NOT NULL;

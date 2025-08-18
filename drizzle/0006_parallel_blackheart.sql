@@ -1,0 +1,1 @@
+ALTER TABLE "games" RENAME COLUMN "header-image" TO "header_image";

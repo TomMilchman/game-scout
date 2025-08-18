@@ -2,11 +2,11 @@ import {
     pgTable,
     serial,
     text,
-    timestamp,
     varchar,
     integer,
     pgEnum,
     unique,
+    timestamp,
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -23,7 +23,8 @@ export const games = pgTable("games", {
     steam_app_id: integer("steam_app_id").unique(),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
-    releaseDate: timestamp("release_date"),
+    releaseDate: varchar("release_date", { length: 24 }),
+    header_image: varchar("header_image", { length: 255 }),
 });
 
 export const users = pgTable("users", {
@@ -44,3 +45,9 @@ export const userGames = pgTable(
     },
     (table) => [unique("unique_user_game").on(table.userId, table.gameId)]
 );
+
+export const cachedQueries = pgTable("cached_queries", {
+    query: text("query").primaryKey(),
+    scrapedAt: timestamp("scraped_at").notNull(),
+    totalGames: integer("total_games").notNull().default(0),
+});

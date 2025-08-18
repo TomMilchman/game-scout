@@ -1,0 +1,1 @@
+ALTER TABLE "games" ALTER COLUMN "release_date" SET DATA TYPE varchar(24);

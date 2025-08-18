@@ -1,52 +1,52 @@
 import sql from "@/lib/db";
 import { GameDetails } from "steamapi";
+import { Game } from "@/app/types";
+
+const normalize = (gameName: string) => gameName.replace(/[\s-]+/g, "%");
 
 export async function searchGamesByName(
     gameName: string,
     userId: string,
     limit: number
 ) {
-    const normalized = gameName.replace(/[\s-]+/g, "%");
+    const normalized = normalize(gameName);
 
-    return await sql`
-    SELECT g.*, ug.status
-    FROM games g
-    LEFT JOIN user_games ug
-    ON ug.game_id = g.id
-    AND ug.user_id = ${userId}
-    WHERE g.title ILIKE ${"%" + normalized + "%"}
-    LIMIT ${limit};
-    `;
+    return (await sql`
+        SELECT g.*, ug.status
+        FROM games g
+        LEFT JOIN user_games ug
+        ON ug.game_id = g.id
+        AND ug.user_id = ${userId}
+        WHERE g.title ILIKE ${"%" + normalized + "%"}
+        LIMIT ${limit};
+        `) as Game[];
 }
 
-export async function cacheGames(
-    gameDetailsArray: GameDetails[],
-    userId: string
-) {
-    const insertedGames = await Promise.all(
-        gameDetailsArray.map((game) => insertGame(game, userId))
+export async function upsertGames(games: GameDetails[]) {
+    if (games.length === 0) return [];
+
+    await Promise.all(
+        games.map(
+            (game) =>
+                sql`
+                INSERT INTO games (steam_app_id, title, description, release_date, header_image)
+                VALUES (${game.id}, ${game.name}, ${game.shortDescription}, ${game.releaseDate?.date}, ${game.headerImage})
+                ON CONFLICT (steam_app_id) DO 
+                UPDATE SET
+                    title = EXCLUDED.title,
+                    description = EXCLUDED.description,
+                    header_image = EXCLUDED.header_image
+                `
+        )
     );
-
-    return insertedGames;
 }
 
-export async function insertGame(gameDetails: GameDetails, userId: string) {
-    const releaseDateStr = gameDetails.releaseDate?.date ?? null;
-    const releaseDate = releaseDateStr
-        ? new Date(releaseDateStr).toISOString()
-        : null;
+export async function countGamesByQuery(query: string): Promise<number> {
+    const result = await sql`
+        SELECT COUNT(*)::int AS count
+        FROM games
+        WHERE title ILIKE ${`%${query}%`}
+    `;
 
-    await sql`
-    INSERT INTO games (steam_app_id, title, description, release_date)
-    VALUES (${gameDetails.id}, ${gameDetails.name}, ${gameDetails.shortDescription}, ${releaseDate})
-    ON CONFLICT (steam_app_id) DO NOTHING
-    ;`;
-
-    return await sql`
-    SELECT g.*, ug.status
-    FROM games g
-    LEFT JOIN user_games ug
-    ON ug.game_id = g.id
-    AND ug.user_id = ${userId}
-    WHERE g.steam_app_id = ${gameDetails.id};`;
+    return result[0]?.count ?? 0;
 }

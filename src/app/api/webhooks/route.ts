@@ -1,6 +1,6 @@
 import { createUser, deleteUser } from "@/db/users";
 import { NextRequest, NextResponse } from "next/server";
-import { jsonError } from "@/app/utils/apiUtils";
+import { jsonError } from "@/utils/apiUtils";
 import { verifyWebhook, WebhookEvent } from "@clerk/nextjs/webhooks";
 
 export async function POST(req: NextRequest) {

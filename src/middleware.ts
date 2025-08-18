@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { jsonError } from "./app/utils/apiUtils";
+import { jsonError } from "./utils/apiUtils";
 
 const isPublicRoute = createRouteMatcher(["/", "/about", "/auth/(.*)"]);
 const isWebhookRoute = createRouteMatcher(["/api/webhooks(.*)"]);

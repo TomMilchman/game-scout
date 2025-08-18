@@ -1,10 +1,13 @@
-export type UserGameStatus =
-    | "never-played"
-    | "playing"
-    | "on-hold"
-    | "finished"
-    | "completed"
-    | "dropped";
+export const userGameStatuses = [
+    "Never Played",
+    "Playing",
+    "On Hold",
+    "Finished",
+    "Completed",
+    "Dropped",
+] as const;
+
+export type UserGameStatus = (typeof userGameStatuses)[number];
 
 export interface Game {
     id: number;
@@ -13,5 +16,5 @@ export interface Game {
     description: string;
     release_date: string | null;
     header_image: string | null;
-    status: string | null;
+    status: UserGameStatus | null;
 }

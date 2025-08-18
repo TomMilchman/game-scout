@@ -16,7 +16,11 @@ export default async function Search({
     return (
         <div className="flex flex-col gap-2 rounded-md bg-gray-700 mx-auto max-w-full mt-3">
             {games.map((game) => (
-                <GameSearchRow key={game.id} game={game} />
+                <GameSearchRow
+                    key={game.id}
+                    game={game}
+                    userId={userId || ""}
+                />
             ))}
         </div>
     );

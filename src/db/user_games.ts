@@ -1,9 +1,11 @@
+"use server";
+
 import sql from "@/lib/db";
 import { UserGameStatus } from "@/app/types";
 
-export async function upsertUserGame(
+export async function upsertUserGameStatus(
     userId: string,
-    gameId: string,
+    gameId: number,
     status: UserGameStatus
 ) {
     await sql`

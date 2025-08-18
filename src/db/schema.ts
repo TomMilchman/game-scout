@@ -10,12 +10,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
-    "never-played",
-    "playing",
-    "on-hold",
-    "finished",
-    "completed",
-    "dropped",
+    "Never Played",
+    "Playing",
+    "On Hold",
+    "Finished",
+    "Completed",
+    "Dropped",
 ]);
 
 export const games = pgTable("games", {
@@ -41,7 +41,7 @@ export const userGames = pgTable(
             onDelete: "cascade",
         }),
         gameId: integer("game_id").references(() => games.id),
-        status: statusEnum("status").notNull().default("never-played"),
+        status: statusEnum("status").notNull().default("Never Played"),
     },
     (table) => [unique("unique_user_game").on(table.userId, table.gameId)]
 );

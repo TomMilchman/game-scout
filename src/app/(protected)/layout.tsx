@@ -5,7 +5,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <>
             <Navigation />
-            <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            <div className="pt-16">
+                <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+            </div>
         </>
     );
 }
+//

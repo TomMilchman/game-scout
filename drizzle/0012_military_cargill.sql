@@ -1,0 +1,1 @@
+ALTER TABLE "games" ADD COLUMN "type" varchar(24) DEFAULT 'game';

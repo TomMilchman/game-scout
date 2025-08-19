@@ -24,7 +24,9 @@ export const games = pgTable("games", {
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
     releaseDate: varchar("release_date", { length: 24 }),
-    header_image: varchar("header_image", { length: 255 }),
+    header_image: text("header_image"),
+    capsule_image: text("capsule_image"),
+    type: varchar("type", { length: 24 }),
 });
 
 export const users = pgTable("users", {

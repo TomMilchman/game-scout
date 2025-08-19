@@ -1,26 +1,18 @@
 import { UserButton, SignedIn } from "@clerk/nextjs";
+import Link from "next/link";
 
 export const Navigation = () => {
     return (
-        <nav className="bg-[var(--background)] border-b border-[var(--foreground)]/10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-16 items-center">
-                    <div className="flex-shrink-0">
-                        <h1 className="text-xl font-semibold text-[var(--foreground)]">
-                            GameScout
-                        </h1>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <SignedIn>
-                            {/* <SignOutButton>
-                                <button className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700 cursor-pointer">
-                                    Sign Out
-                                </button>
-                            </SignOutButton> */}
-                            <UserButton />
-                        </SignedIn>
-                    </div>
-                </div>
+        <nav className="fixed top-0 left-0 w-full z-50 bg-[var(--background)] border-b border-[var(--foreground)]/10">
+            <div className="flex justify-between h-16 items-center px-4">
+                <Link href={"/dashboard"}>
+                    <h1 className="text-m md:text-xl font-extrabold text-white">
+                        GameScout
+                    </h1>
+                </Link>
+                <SignedIn>
+                    <UserButton />
+                </SignedIn>
             </div>
         </nav>
     );

@@ -4,6 +4,19 @@ import { Game } from "@/app/types";
 
 const normalize = (gameName: string) => gameName.replace(/[\s-]+/g, "%");
 
+export async function getGameById(gameId: number, userId: string) {
+    const rows = await sql`
+        SELECT g.*, ug.status
+        FROM games g
+        LEFT JOIN user_games ug
+        ON ug.game_id = g.id
+        AND ug.user_id = ${userId}
+        WHERE g.id = ${gameId}
+        ;`;
+
+    return rows[0];
+}
+
 export async function searchGamesByName(
     query: string,
     userId: string,
@@ -29,13 +42,15 @@ export async function upsertGames(games: GameDetails[]) {
         games.map(
             (game) =>
                 sql`
-                INSERT INTO games (steam_app_id, title, description, release_date, header_image)
-                VALUES (${game.id}, ${game.name}, ${game.shortDescription}, ${game.releaseDate?.date}, ${game.headerImage})
+                INSERT INTO games (steam_app_id, title, description, type, release_date, header_image, capsule_image)
+                VALUES (${game.id}, ${game.name}, ${game.shortDescription}, ${game.type}, ${game.releaseDate?.date}, ${game.headerImage}, ${game.capsuleImage})
                 ON CONFLICT (steam_app_id) DO 
                 UPDATE SET
                     title = EXCLUDED.title,
                     description = EXCLUDED.description,
-                    header_image = EXCLUDED.header_image
+                    type = EXCLUDED.type,
+                    header_image = EXCLUDED.header_image,
+                    capsule_image = EXCLUDED.capsule_image
                 `
         )
     );

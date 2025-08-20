@@ -8,24 +8,29 @@ export default function ChangeGameStatus({
     initialStatus,
     userId,
     gameId,
+    onStatusChange,
 }: {
     initialStatus: UserGameStatus;
     userId: string;
     gameId: number;
+    onStatusChange?: (newStatus: UserGameStatus) => void;
 }) {
     const [status, setStatus] = useState(initialStatus);
 
-    const onChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const prevStatus = status;
         const newStatus = e.target.value as UserGameStatus;
         setStatus(newStatus);
 
         try {
             await upsertUserGameStatus(userId, gameId, newStatus);
+            onStatusChange?.(newStatus);
         } catch (err) {
             console.error("Failed to update status", err);
-            setStatus(status);
+            setStatus(prevStatus);
         }
     };
+
     return (
         <select
             className="
@@ -35,7 +40,7 @@ export default function ChangeGameStatus({
             "
             title="Change Status"
             value={status || "Never Played"}
-            onChange={onChange}
+            onChange={handleChange}
         >
             {userGameStatuses.map((status) => (
                 <option key={status} value={status}>

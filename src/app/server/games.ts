@@ -3,40 +3,80 @@ import { scrapeSteamSearch } from "@/services/scrapers/steamScraper";
 import { steam } from "@/lib/steam";
 import { getCachedQuery, upsertCachedQuery } from "@/db/cached_queries";
 import { normalizeQuery } from "@/utils/generalUtils";
+import { GameDetails } from "steamapi";
 
-export async function getGames(query: string, userId: string, limit = 10) {
-    query = normalizeQuery(query);
-    let games = await searchGamesByName(query, userId, limit);
-    const currentCount = games.length;
+export async function getGames(query: string, userId: string) {
+    try {
+        query = normalizeQuery(query);
+        const limit = 50;
+        let games = await searchGamesByName(query, userId, limit);
+        const currentCount = games.length;
 
-    const cachedQuery = await getCachedQuery(query);
-    const missingCount = limit - currentCount;
+        let cachedQuery = null;
 
-    const scrapeCount = cachedQuery
-        ? Math.max(cachedQuery.total_games - currentCount, 0)
-        : missingCount;
+        try {
+            cachedQuery = await getCachedQuery(query);
+        } catch (error) {
+            console.warn(
+                "Cache lookup failed, continuing without cache",
+                error
+            );
+        }
 
-    const shouldScrape =
-        (missingCount > 0 && !cachedQuery) ||
-        (cachedQuery && currentCount < cachedQuery.total_games);
+        const missingCount = limit - currentCount;
 
-    if (shouldScrape && scrapeCount > 0) {
-        await scrapeAndCacheGames(query, scrapeCount);
-        games = await searchGamesByName(query, userId, limit);
+        const scrapeCount = cachedQuery
+            ? Math.max(cachedQuery.total_games - currentCount, 0)
+            : missingCount;
 
-        const totalKnown = await countGamesByQuery(query);
-        await upsertCachedQuery(query, totalKnown);
+        const ONE_DAY_MS = 1000 * 60 * 60 * 24;
+        const shouldScrape =
+            (missingCount > 0 && !cachedQuery) ||
+            (cachedQuery && currentCount < cachedQuery.total_games) ||
+            (cachedQuery &&
+                Date.now() - cachedQuery.scraped_at.getTime() > ONE_DAY_MS);
+
+        let scrapeSucceeded = false;
+
+        if (shouldScrape && scrapeCount > 0) {
+            try {
+                await scrapeAndCacheGames(query, scrapeCount);
+                games = await searchGamesByName(query, userId, limit);
+                scrapeSucceeded = true;
+            } catch (error) {
+                console.error(
+                    "Scraping failed, returning DB-only results:",
+                    error
+                );
+            }
+
+            if (scrapeSucceeded) {
+                const totalKnown = await countGamesByQuery(query);
+                await upsertCachedQuery(query, totalKnown);
+            }
+        }
+
+        return games;
+    } catch (error) {
+        console.error("getGames failed:", error);
+        return [];
     }
-
-    return games;
 }
 
-export async function scrapeAndCacheGames(query: string, limit = 10) {
+async function scrapeAndCacheGames(query: string, limit: number) {
     const gameIds = await scrapeSteamSearch(query, limit);
 
-    const gameDetails = await Promise.all(
-        gameIds.map((id) => steam.getGameDetails(parseInt(id)))
-    );
+    try {
+        const gameDetails = await Promise.allSettled(
+            gameIds.map((id) => steam.getGameDetails(parseInt(id)))
+        );
 
-    await upsertGames(gameDetails);
+        const successfulGameDetails = gameDetails
+            .filter((r) => r.status === "fulfilled")
+            .map((r) => (r as PromiseFulfilledResult<GameDetails>).value);
+
+        await upsertGames(successfulGameDetails);
+    } catch (error) {
+        console.error("scrapeAndChacheGames failed", error);
+    }
 }

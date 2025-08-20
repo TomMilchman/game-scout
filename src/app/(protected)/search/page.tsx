@@ -9,9 +9,9 @@ export default async function SearchPage({
     searchParams: Promise<{ query: string; limit: number }>;
 }) {
     const { userId } = await auth();
-    const { query, limit } = await searchParams;
+    const { query } = await searchParams;
 
-    const games: Game[] = await getGames(query || "", userId || "", limit);
+    const games: Game[] = await getGames(query || "", userId || "");
 
     return (
         <div className="flex flex-col gap-2 mx-auto max-w-full mt-3">

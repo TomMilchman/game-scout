@@ -29,12 +29,12 @@ export async function getGames(query: string, userId: string) {
             ? Math.max(cachedQuery.total_games - currentCount, 0)
             : missingCount;
 
-        const ONE_DAY_MS = 1000 * 60 * 60 * 24;
+        const ONE_HOUR_MS = 1000 * 60 * 60;
         const shouldScrape =
             (missingCount > 0 && !cachedQuery) ||
             (cachedQuery && currentCount < cachedQuery.total_games) ||
             (cachedQuery &&
-                Date.now() - cachedQuery.scraped_at.getTime() > ONE_DAY_MS);
+                Date.now() - cachedQuery.scraped_at.getTime() > ONE_HOUR_MS);
 
         let scrapeSucceeded = false;
 

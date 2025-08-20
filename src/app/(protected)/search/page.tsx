@@ -1,6 +1,6 @@
 import { getGames } from "@/app/server/games";
 import { Game } from "@/app/types";
-import GameSearchRow from "@/components/gameSearchRow";
+import GameSearchClientWrapper from "@/components/gameSearchClientWrapper";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function SearchPage({
@@ -14,14 +14,8 @@ export default async function SearchPage({
     const games: Game[] = await getGames(query || "", userId || "");
 
     return (
-        <div className="flex flex-col gap-2 mx-auto max-w-full mt-3">
-            {games.map((game) => (
-                <GameSearchRow
-                    key={game.id}
-                    game={game}
-                    userId={userId || ""}
-                />
-            ))}
+        <div>
+            <GameSearchClientWrapper games={games} userId={userId || ""} />
         </div>
     );
 }

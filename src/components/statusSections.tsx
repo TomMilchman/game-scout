@@ -94,7 +94,6 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
                     )}
                 </section>
             ))}
-            ;
         </>
     );
 }

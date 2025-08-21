@@ -7,6 +7,7 @@ import {
     pgEnum,
     unique,
     timestamp,
+    numeric,
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -18,16 +19,35 @@ export const statusEnum = pgEnum("status", [
     "Dropped",
 ]);
 
+export const storeEnum = pgEnum("store", ["Steam", "Epic", "GOG"]);
+
 export const games = pgTable("games", {
     id: serial("id").primaryKey(),
     steam_app_id: integer("steam_app_id").unique(),
     title: varchar("title", { length: 255 }).notNull(),
     description: text("description"),
-    releaseDate: varchar("release_date", { length: 24 }),
+    release_date: varchar("release_date", { length: 24 }),
     header_image: text("header_image"),
     capsule_image: text("capsule_image"),
     type: varchar("type", { length: 24 }),
 });
+
+export const prices = pgTable(
+    "prices",
+    {
+        id: serial("id").primaryKey(),
+        gameId: integer("game_id").references(() => games.id, {
+            onDelete: "cascade",
+        }),
+        store: storeEnum("store").notNull().default("Steam"),
+        base_price: numeric("base_price", { precision: 10, scale: 2 }),
+        current_price: numeric("current_price", { precision: 10, scale: 2 }),
+        currency: varchar("currency", { length: 3 }),
+        url: text("url"),
+        last_updated: timestamp("last_updated").notNull().defaultNow(),
+    },
+    (table) => [unique("unique_store").on(table.gameId, table.store)]
+);
 
 export const users = pgTable("users", {
     id: varchar("id", { length: 100 }).primaryKey(),
@@ -39,17 +59,19 @@ export const userGames = pgTable(
     "user_games",
     {
         id: serial("id").primaryKey(),
-        userId: varchar("user_id").references(() => users.id, {
+        user_id: varchar("user_id").references(() => users.id, {
             onDelete: "cascade",
         }),
-        gameId: integer("game_id").references(() => games.id),
+        game_id: integer("game_id").references(() => games.id, {
+            onDelete: "cascade",
+        }),
         status: statusEnum("status").notNull().default("Never Played"),
     },
-    (table) => [unique("unique_user_game").on(table.userId, table.gameId)]
+    (table) => [unique("unique_user_game").on(table.user_id, table.game_id)]
 );
 
 export const cachedQueries = pgTable("cached_queries", {
     query: text("query").primaryKey(),
-    scrapedAt: timestamp("scraped_at").notNull(),
-    totalGames: integer("total_games").notNull().default(0),
+    scraped_at: timestamp("scraped_at").notNull(),
+    total_Games: integer("total_games").notNull().default(0),
 });

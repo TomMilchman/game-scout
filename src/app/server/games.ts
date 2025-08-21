@@ -1,11 +1,20 @@
-import { countGamesByQuery, searchGamesByName, upsertGames } from "@/db/games";
-import { scrapeSteamSearch } from "@/services/scrapers/steamScraper";
-import { steam } from "@/lib/steam";
+import {
+    countGamesByQuery,
+    getGameAndPricesById,
+    searchGamesByName,
+    upsertGames,
+} from "@/db/games";
+import { scrapeSteamSearch } from "@/services/scrapers/cheerio/steamScraper";
 import { getCachedQuery, upsertCachedQuery } from "@/db/cached_queries";
 import { normalizeQuery } from "@/utils/generalUtils";
-import { GameDetails } from "steamapi";
+import {
+    fetchGamePriceFromSteam,
+    fetchSteamGamesDetails,
+} from "@/services/steamAPI/steamApi";
+import { GamePriceDetails } from "../types";
+import { upsertGamePrices } from "@/db/prices";
 
-export async function getGames(query: string, userId: string) {
+export async function fetchGames(query: string, userId: string) {
     try {
         query = normalizeQuery(query);
         const limit = 50;
@@ -29,16 +38,17 @@ export async function getGames(query: string, userId: string) {
             ? Math.max(cachedQuery.total_games - currentCount, 0)
             : missingCount;
 
-        const ONE_HOUR_MS = 1000 * 60 * 60;
+        const ONE_DAY_MS = 1000 * 60 * 60 * 24;
         const shouldScrape =
             (missingCount > 0 && !cachedQuery) ||
-            (cachedQuery && currentCount < cachedQuery.total_games) ||
-            (cachedQuery &&
-                Date.now() - cachedQuery.scraped_at.getTime() > ONE_HOUR_MS);
+            (cachedQuery && currentCount < cachedQuery.total_games);
+        const shouldRefresh =
+            cachedQuery &&
+            Date.now() - cachedQuery.scraped_at.getTime() > ONE_DAY_MS;
 
         let scrapeSucceeded = false;
 
-        if (shouldScrape && scrapeCount > 0) {
+        if (shouldRefresh || (shouldScrape && scrapeCount > 0)) {
             try {
                 await scrapeAndCacheGames(query, scrapeCount);
                 games = await searchGamesByName(query, userId, limit);
@@ -64,19 +74,33 @@ export async function getGames(query: string, userId: string) {
 }
 
 async function scrapeAndCacheGames(query: string, limit: number) {
-    const gameIds = await scrapeSteamSearch(query, limit);
-
     try {
-        const gameDetails = await Promise.allSettled(
-            gameIds.map((id) => steam.getGameDetails(parseInt(id)))
-        );
-
-        const successfulGameDetails = gameDetails
-            .filter((r) => r.status === "fulfilled")
-            .map((r) => (r as PromiseFulfilledResult<GameDetails>).value);
-
-        await upsertGames(successfulGameDetails);
+        const gameIds = await scrapeSteamSearch(query, limit);
+        const gamesDetails = await fetchSteamGamesDetails(gameIds);
+        await upsertGames(gamesDetails);
     } catch (error) {
         console.error("scrapeAndChacheGames failed", error);
     }
+}
+
+export async function fetchGameAndItsPrices(gameId: number, userId: string) {
+    let game = await getGameAndPricesById(gameId, userId);
+    const last_updated = game.game_prices?.Steam?.last_updated;
+    const ONE_HOUR_MS = 1000 * 60 * 60;
+
+    if (!last_updated || Date.now() - last_updated.getTime() > ONE_HOUR_MS) {
+        // Get prices from APIs and scraping
+        const gamePriceDetailsAcrossStores: GamePriceDetails[] = [];
+        gamePriceDetailsAcrossStores.push(
+            await fetchGamePriceFromSteam(gameId, game.steam_app_id)
+        );
+
+        // Upsert pricing to DB
+        await upsertGamePrices(gamePriceDetailsAcrossStores);
+
+        // Return an updated game object
+        game = await getGameAndPricesById(gameId, userId);
+    }
+
+    return game;
 }

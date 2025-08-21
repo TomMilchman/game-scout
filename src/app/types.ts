@@ -19,4 +19,17 @@ export interface Game {
     capsule_image: string | null;
     status: UserGameStatus | null;
     type: string;
+    game_prices: Record<StoreName, GamePriceDetails> | undefined;
+}
+
+export type StoreName = "Steam" | "Epic" | "GOG";
+
+export interface GamePriceDetails {
+    game_id: number;
+    store: StoreName;
+    base_price: number;
+    current_price: number;
+    currency: string | undefined;
+    url: string;
+    last_updated: Date;
 }

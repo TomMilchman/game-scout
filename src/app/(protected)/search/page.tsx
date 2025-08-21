@@ -1,4 +1,4 @@
-import { getGames } from "@/app/server/games";
+import { fetchGames } from "@/app/server/games";
 import { Game } from "@/app/types";
 import GameSearchClientWrapper from "@/components/gameSearchClientWrapper";
 import { auth } from "@clerk/nextjs/server";
@@ -11,7 +11,7 @@ export default async function SearchPage({
     const { userId } = await auth();
     const { query } = await searchParams;
 
-    const games: Game[] = await getGames(query || "", userId || "");
+    const games: Game[] = await fetchGames(query || "", userId || "");
 
     return (
         <div>

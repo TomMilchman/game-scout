@@ -4,7 +4,12 @@ import { Game } from "@/app/types";
 import GameSearchRow from "./gameSearchRow";
 import { useState, useMemo } from "react";
 
-type SortOption = "name-asc" | "name-desc" | "date-asc" | "date-desc";
+type SortOption =
+    | "no-filter"
+    | "name-asc"
+    | "name-desc"
+    | "date-asc"
+    | "date-desc";
 
 export default function GameSearchClientWrapper({
     games,
@@ -25,7 +30,9 @@ export default function GameSearchClientWrapper({
             );
         }
 
-        if (sortOption === "name-asc") {
+        if (sortOption === "no-filter") {
+            return games;
+        } else if (sortOption === "name-asc") {
             result.sort((a, b) => a.title.localeCompare(b.title));
         } else if (sortOption === "name-desc") {
             result.sort((a, b) => b.title.localeCompare(a.title));
@@ -68,6 +75,7 @@ export default function GameSearchClientWrapper({
                     }
                     className="px-3 py-2 rounded-md bg-gray-700 text-white"
                 >
+                    <option value="no-filter">No Filter</option>
                     <option value="name-asc">Name ↑</option>
                     <option value="name-desc">Name ↓</option>
                     <option value="date-asc">Release Date ↑</option>

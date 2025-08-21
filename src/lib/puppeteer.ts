@@ -1,25 +1,20 @@
-"use server";
+import { Cluster } from "puppeteer-cluster";
 
-import puppeteer, { Browser } from "puppeteer";
+let cluster: Cluster | null = null;
 
-let browser: Browser | null = null;
+export async function getCluster() {
+    if (!cluster) {
+        cluster = await Cluster.launch({
+            concurrency: Cluster.CONCURRENCY_CONTEXT,
+            maxConcurrency: 5,
+            puppeteerOptions: { headless: true },
+            timeout: 30000,
+        });
 
-export async function getBrowser() {
-    if (browser) return browser;
-
-    browser = await puppeteer.launch({
-        headless: true,
-        devtools: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        defaultViewport: null,
-    });
-
-    return browser;
-}
-
-export async function closeBrowser() {
-    if (browser) {
-        await browser.close();
-        browser = null;
+        cluster?.on("taskerror", (err, data) => {
+            console.error(`Error scraping ${data}: ${err.message}`);
+        });
     }
+
+    return cluster;
 }

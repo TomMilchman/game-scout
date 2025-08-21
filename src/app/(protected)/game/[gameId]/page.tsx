@@ -1,5 +1,5 @@
+import { fetchGameAndItsPrices } from "@/app/server/games";
 import ChangeGameStatus from "@/components/changeGameStatus";
-import { getGameById } from "@/db/games";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 
@@ -11,14 +11,21 @@ export default async function GamePage({
     const { gameId } = await params;
     const { userId } = await auth();
 
-    const game = await getGameById(gameId, userId || "");
+    const game = await fetchGameAndItsPrices(gameId, userId || "");
 
     if (!game) {
         notFound();
     }
 
-    const { title, description, type, release_date, header_image, status } =
-        game;
+    const {
+        title,
+        description,
+        type,
+        release_date,
+        header_image,
+        status,
+        game_prices,
+    } = game;
 
     return (
         <div className="max-w-5xl mx-auto p-6">
@@ -65,6 +72,10 @@ export default async function GamePage({
                 <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition">
                     Add to Wishlist
                 </button>
+            </section>
+            <section>
+                Steam: {game_prices?.Steam.current_price} instead of{" "}
+                {game_prices?.Steam.base_price}
             </section>
         </div>
     );

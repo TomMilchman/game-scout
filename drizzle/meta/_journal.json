@@ -106,6 +106,20 @@
       "when": 1755606911774,
       "tag": "0014_sticky_randall",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1755768557805,
+      "tag": "0015_dizzy_roland_deschain",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1755769629020,
+      "tag": "0016_first_scarlet_spider",
+      "breakpoints": true
     }
   ]
 }

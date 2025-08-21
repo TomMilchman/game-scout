@@ -7,7 +7,7 @@ export async function scrapeSteamSearch(query: string, limit: number) {
     const html = await res.text();
     const $ = cheerio.load(html);
 
-    const gameIds: string[] = [];
+    const gameIds: number[] = [];
     $("a.search_result_row").each((i, el) => {
         if (i >= limit) return false;
 
@@ -15,7 +15,7 @@ export async function scrapeSteamSearch(query: string, limit: number) {
         const match = href?.match(/app\/(\d+)/);
 
         if (match) {
-            gameIds.push(match[1]);
+            gameIds.push(parseInt(match[1]));
         }
     });
 

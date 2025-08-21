@@ -1,20 +1,54 @@
 import sql from "@/lib/db";
 import { GameDetails } from "steamapi";
-import { Game } from "@/app/types";
+import { Game, GamePriceDetails, StoreName } from "@/app/types";
 
 const normalize = (gameName: string) => gameName.replace(/[\s-]+/g, "%");
 
-export async function getGameById(gameId: number, userId: string) {
+export async function getGameAndPricesById(gameId: number, userId: string) {
     const rows = await sql`
-        SELECT g.*, ug.status
+        SELECT g.*, ug.status, p.*
         FROM games g
         LEFT JOIN user_games ug
-        ON ug.game_id = g.id
-        AND ug.user_id = ${userId}
-        WHERE g.id = ${gameId}
-        ;`;
+            ON ug.game_id = g.id
+            AND ug.user_id = ${userId}
+        LEFT JOIN prices p
+            ON p.game_id = g.id
+        WHERE g.id = ${gameId};
+        `;
 
-    return rows[0];
+    const prices = rows.reduce<Partial<Record<StoreName, GamePriceDetails>>>(
+        (acc, r) => {
+            const store = r.store as StoreName;
+            acc[store] = {
+                game_id: r.game_id,
+                store,
+                base_price: r.base_price,
+                current_price: r.current_price,
+                currency: r.currency,
+                url: r.url,
+                last_updated: r.last_updated,
+            };
+            return acc;
+        },
+        {}
+    );
+
+    const game =
+        rows[0] &&
+        ({
+            id: rows[0].id,
+            steam_app_id: rows[0].steam_app_id,
+            title: rows[0].title,
+            description: rows[0].description,
+            release_date: rows[0].release_date,
+            header_image: rows[0].header_image,
+            capsule_image: rows[0].capsule_image,
+            type: rows[0].type,
+            status: rows[0].status,
+            game_prices: { ...prices },
+        } as Game);
+
+    return game;
 }
 
 export async function searchGamesByName(
@@ -28,29 +62,27 @@ export async function searchGamesByName(
         SELECT g.*, ug.status
         FROM games g
         LEFT JOIN user_games ug
-        ON ug.game_id = g.id
-        AND ug.user_id = ${userId}
+            ON ug.game_id = g.id
+            AND ug.user_id = ${userId}
         WHERE g.title ILIKE ${"%" + normalized + "%"}
         LIMIT ${limit};
         `) as Game[];
 }
 
 export async function upsertGames(games: GameDetails[]) {
-    if (games.length === 0) return [];
-
     await Promise.all(
         games.map(
             (game) =>
                 sql`
-                INSERT INTO games (steam_app_id, title, description, type, release_date, header_image, capsule_image)
-                VALUES (${game.id}, ${game.name}, ${game.shortDescription}, ${game.type}, ${game.releaseDate?.date}, ${game.headerImage}, ${game.capsuleImage})
-                ON CONFLICT (steam_app_id) DO 
-                UPDATE SET
-                    title = EXCLUDED.title,
-                    description = EXCLUDED.description,
-                    type = EXCLUDED.type,
-                    header_image = EXCLUDED.header_image,
-                    capsule_image = EXCLUDED.capsule_image
+                    INSERT INTO games (steam_app_id, title, description, type, release_date, header_image, capsule_image)
+                    VALUES (${game.id}, ${game.name}, ${game.shortDescription}, ${game.type}, ${game.releaseDate?.date}, ${game.headerImage}, ${game.capsuleImage})
+                    ON CONFLICT (steam_app_id) DO
+                    UPDATE SET
+                        title = EXCLUDED.title,
+                        description = EXCLUDED.description,
+                        type = EXCLUDED.type,
+                        header_image = EXCLUDED.header_image,
+                        capsule_image = EXCLUDED.capsule_image
                 `
         )
     );

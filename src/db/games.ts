@@ -22,12 +22,12 @@ export async function getGameAndPricesById(gameId: number, userId: string) {
             acc[store] = {
                 game_id: r.game_id,
                 store,
-                base_price: r.base_price,
-                current_price: r.current_price,
+                base_price: parseFloat(r.base_price),
+                current_price: parseFloat(r.current_price),
                 currency: r.currency,
                 url: r.url,
                 last_updated: r.last_updated,
-            };
+            } as GamePriceDetails;
             return acc;
         },
         {}

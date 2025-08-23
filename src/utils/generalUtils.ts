@@ -6,3 +6,12 @@ export function normalizeQuery(query: string) {
         .replace(/[^\w\s]/g, "") // remove other punctuation
         .replace(/\s+/g, " "); // collapse multiple spaces
 }
+
+export function generateGameSlug(title: string) {
+    return title
+        .toLowerCase()
+        .replace(/'/g, "") // remove apostrophes
+        .replace(/[^a-z0-9 ]/g, "") // remove other non-alphanumeric characters except space
+        .trim()
+        .replace(/\s+/g, "_"); // replace spaces with underscores
+}

@@ -19,10 +19,10 @@ export interface Game {
     capsule_image: string | null;
     status: UserGameStatus | null;
     type: string;
-    game_prices: Record<StoreName, GamePriceDetails> | undefined;
+    game_prices: Record<StoreName, GamePriceDetails>;
 }
 
-export type StoreName = "Steam" | "Epic" | "GOG";
+export type StoreName = "Steam" | "GOG";
 
 export interface GamePriceDetails {
     game_id: number;

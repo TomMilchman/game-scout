@@ -8,11 +8,12 @@ import { scrapeSteamSearch } from "@/services/scrapers/cheerio/steamScraper";
 import { getCachedQuery, upsertCachedQuery } from "@/db/cached_queries";
 import { normalizeQuery } from "@/utils/generalUtils";
 import {
-    fetchGamePriceFromSteam,
+    fetchSteamPrice,
     fetchSteamGamesDetails,
 } from "@/services/steamAPI/steamApi";
 import { GamePriceDetails } from "../types";
 import { upsertGamePrices } from "@/db/prices";
+import { scrapeGogPrice } from "@/services/scrapers/puppeteer/gogScraper";
 
 export async function fetchGames(query: string, userId: string) {
     try {
@@ -84,23 +85,42 @@ async function scrapeAndCacheGames(query: string, limit: number) {
 }
 
 export async function fetchGameAndItsPrices(gameId: number, userId: string) {
-    let game = await getGameAndPricesById(gameId, userId);
-    const last_updated = game.game_prices?.Steam?.last_updated;
-    const ONE_HOUR_MS = 1000 * 60 * 60;
+    try {
+        let game = await getGameAndPricesById(gameId, userId);
+        const last_updated = game.game_prices?.Steam?.last_updated;
+        const ONE_HOUR_MS = 1000 * 60 * 60;
 
-    if (!last_updated || Date.now() - last_updated.getTime() > ONE_HOUR_MS) {
-        // Get prices from APIs and scraping
-        const gamePriceDetailsAcrossStores: GamePriceDetails[] = [];
-        gamePriceDetailsAcrossStores.push(
-            await fetchGamePriceFromSteam(gameId, game.steam_app_id)
-        );
+        if (
+            !last_updated ||
+            Date.now() - last_updated.getTime() > ONE_HOUR_MS
+        ) {
+            // Get prices from APIs and scraping
+            const gamePriceDetailsAcrossStores: GamePriceDetails[] = [];
 
-        // Upsert pricing to DB
-        await upsertGamePrices(gamePriceDetailsAcrossStores);
+            const steamPriceDetails = await fetchSteamPrice(
+                gameId,
+                game.steam_app_id
+            );
 
-        // Return an updated game object
-        game = await getGameAndPricesById(gameId, userId);
+            if (steamPriceDetails.base_price !== null) {
+                gamePriceDetailsAcrossStores.push(steamPriceDetails);
+            }
+
+            const gogPriceDetails = await scrapeGogPrice(game.title, gameId);
+
+            if (gogPriceDetails && gogPriceDetails.base_price !== null) {
+                gamePriceDetailsAcrossStores.push(gogPriceDetails);
+            }
+
+            // Upsert pricing to DB
+            await upsertGamePrices(gamePriceDetailsAcrossStores);
+
+            // Return an updated game object
+            game = await getGameAndPricesById(gameId, userId);
+        }
+
+        return game;
+    } catch (error) {
+        console.error("fetchGameAndPricesById failed", error);
     }
-
-    return game;
 }

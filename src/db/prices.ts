@@ -21,3 +21,22 @@ export async function upsertGamePrices(
         )
     );
 }
+
+export async function getPricesForGames(gameIds: number[]) {
+    const rows = await sql`
+    SELECT * FROM prices
+    WHERE game_id = ANY(${gameIds})
+  `;
+
+    const prices: GamePriceDetails[] = rows.map((r) => ({
+        game_id: r.game_id,
+        store: r.store,
+        base_price: parseFloat(r.base_price),
+        current_price: parseFloat(r.current_price),
+        currency: r.currency,
+        url: r.url,
+        last_updated: r.last_updated,
+    }));
+
+    return prices;
+}

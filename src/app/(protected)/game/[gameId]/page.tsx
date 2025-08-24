@@ -30,9 +30,7 @@ export default async function GamePage({
     } = game;
 
     const hasBasePrice = game_prices
-        ? Object.values(game_prices).some(
-              (priceData) => priceData.base_price >= 0
-          )
+        ? game_prices.some((priceData) => priceData.base_price >= 0)
         : false;
 
     const canChangeStatus = release_date
@@ -81,60 +79,58 @@ export default async function GamePage({
                         Price Comparison
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {Object.entries(game_prices ?? {}).map(
-                            ([store, priceData]) => {
-                                const Icon =
-                                    store === "Steam"
-                                        ? FaSteam
-                                        : store === "GOG"
-                                        ? SiGogdotcom
-                                        : null;
+                        {game_prices?.map((priceData) => {
+                            const Icon =
+                                priceData.store === "Steam"
+                                    ? FaSteam
+                                    : priceData.store === "GOG"
+                                    ? SiGogdotcom
+                                    : null;
 
-                                return (
-                                    <a
-                                        key={store}
-                                        href={priceData.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center justify-between p-3 bg-gray-700 rounded-lg shadow hover:bg-gray-600 transition"
-                                    >
-                                        <div className="flex items-center">
-                                            {Icon && (
-                                                <Icon className="w-6 h-6 mr-2" />
-                                            )}
-                                            <span className="font-semibold text-white">
-                                                {store}
-                                            </span>
-                                        </div>
-                                        <div className="text-right">
-                                            {priceData.current_price <
-                                            priceData.base_price ? (
-                                                <>
-                                                    <span className="line-through text-gray-400 mr-2">
-                                                        {priceData.base_price}
-                                                    </span>
-                                                    <span className="text-green-400 font-bold">
-                                                        {Number(
-                                                            priceData.current_price
-                                                        ) === 0
-                                                            ? "Free"
-                                                            : priceData.current_price}
-                                                    </span>
-                                                </>
-                                            ) : (
-                                                <span className="text-white">
+                            return (
+                                <a
+                                    key={priceData.store}
+                                    href={priceData.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between p-3 bg-gray-700 rounded-lg shadow hover:bg-gray-600 transition"
+                                >
+                                    <div className="flex items-center">
+                                        {Icon && (
+                                            <Icon className="w-6 h-6 mr-2" />
+                                        )}
+                                        <span className="font-semibold text-white">
+                                            {priceData.store}
+                                        </span>
+                                    </div>
+                                    <div className="text-right">
+                                        {priceData.current_price <
+                                        priceData.base_price ? (
+                                            <>
+                                                <span className="line-through text-gray-400 mr-2">
+                                                    {priceData.base_price}
+                                                </span>
+                                                <span className="text-green-400 font-bold">
                                                     {Number(
                                                         priceData.current_price
                                                     ) === 0
                                                         ? "Free"
                                                         : priceData.current_price}
                                                 </span>
-                                            )}
-                                        </div>
-                                    </a>
-                                );
-                            }
-                        )}
+                                            </>
+                                        ) : (
+                                            <span className="text-white">
+                                                {Number(
+                                                    priceData.current_price
+                                                ) === 0
+                                                    ? "Free"
+                                                    : priceData.current_price}
+                                            </span>
+                                        )}
+                                    </div>
+                                </a>
+                            );
+                        })}
                     </div>
                 </section>
             )}

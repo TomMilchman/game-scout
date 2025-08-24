@@ -1,54 +1,33 @@
 import sql from "@/lib/db";
 import { GameDetails } from "steamapi";
-import { Game, GamePriceDetails, StoreName } from "@/app/types";
+import { Game } from "@/app/types";
 
 const normalize = (gameName: string) => gameName.replace(/[\s-]+/g, "%");
 
-export async function getGameAndPricesById(gameId: number, userId: string) {
+export async function getGamesById(gameIds: number[], userId: string) {
     const rows = await sql`
-        SELECT g.*, ug.status, p.*
+        SELECT g.*, ug.status
         FROM games g
         LEFT JOIN user_games ug
             ON ug.game_id = g.id
             AND ug.user_id = ${userId}
-        LEFT JOIN prices p
-            ON p.game_id = g.id
-        WHERE g.id = ${gameId};
+        WHERE g.id = ANY(${gameIds});
         `;
 
-    const prices = rows.reduce<Partial<Record<StoreName, GamePriceDetails>>>(
-        (acc, r) => {
-            const store = r.store as StoreName;
-            acc[store] = {
-                game_id: r.game_id,
-                store,
-                base_price: parseFloat(r.base_price),
-                current_price: parseFloat(r.current_price),
-                currency: r.currency,
-                url: r.url,
-                last_updated: r.last_updated,
-            } as GamePriceDetails;
-            return acc;
-        },
-        {}
-    );
+    const games: Game[] = rows.map((r) => ({
+        id: r.id,
+        steam_app_id: r.steam_app_id,
+        title: r.title,
+        description: r.description,
+        release_date: r.release_date,
+        header_image: r.header_image,
+        capsule_image: r.capsule_image,
+        type: r.type,
+        status: r.status,
+        game_prices: null,
+    }));
 
-    const game =
-        rows[0] &&
-        ({
-            id: rows[0].id,
-            steam_app_id: rows[0].steam_app_id,
-            title: rows[0].title,
-            description: rows[0].description,
-            release_date: rows[0].release_date,
-            header_image: rows[0].header_image,
-            capsule_image: rows[0].capsule_image,
-            type: rows[0].type,
-            status: rows[0].status,
-            game_prices: { ...prices },
-        } as Game);
-
-    return game;
+    return games;
 }
 
 export async function searchGamesByName(

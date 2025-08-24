@@ -1,6 +1,6 @@
 import {
     countGamesByQuery,
-    getGameAndPricesById,
+    getGamesById,
     searchGamesByName,
     upsertGames,
 } from "@/db/games";
@@ -12,7 +12,7 @@ import {
     fetchSteamGamesDetails,
 } from "@/services/steamAPI/steamApi";
 import { GamePriceDetails } from "../types";
-import { upsertGamePrices } from "@/db/prices";
+import { getPricesForGames, upsertGamePrices } from "@/db/prices";
 import { scrapeGogPrice } from "@/services/scrapers/puppeteer/gogScraper";
 
 export async function fetchGames(query: string, userId: string) {
@@ -86,14 +86,21 @@ async function scrapeAndCacheGames(query: string, limit: number) {
 
 export async function fetchGameAndItsPrices(gameId: number, userId: string) {
     try {
-        let game = await getGameAndPricesById(gameId, userId);
-        const last_updated = game.game_prices?.Steam?.last_updated;
-        const ONE_HOUR_MS = 1000 * 60 * 60;
+        let game = (await getGamesWithPricesFromDB([gameId], userId))[0];
 
-        if (
-            !last_updated ||
-            Date.now() - last_updated.getTime() > ONE_HOUR_MS
-        ) {
+        if (!game || !game.game_prices) {
+            console.log(
+                "Couldn't fetch game and prices - does not exist in DB"
+            );
+            return null;
+        }
+
+        const ONE_HOUR_MS = 1000 * 60 * 60;
+        const latestUpdate = Math.max(
+            ...game.game_prices.map((p) => p.last_updated?.getTime() ?? 0)
+        );
+
+        if (Date.now() - latestUpdate > ONE_HOUR_MS) {
             // Get prices from APIs and scraping
             const gamePriceDetailsAcrossStores: GamePriceDetails[] = [];
 
@@ -116,11 +123,33 @@ export async function fetchGameAndItsPrices(gameId: number, userId: string) {
             await upsertGamePrices(gamePriceDetailsAcrossStores);
 
             // Return an updated game object
-            game = await getGameAndPricesById(gameId, userId);
+            game = (await getGamesWithPricesFromDB([gameId], userId))[0];
         }
 
         return game;
     } catch (error) {
         console.error("fetchGameAndPricesById failed", error);
     }
+}
+
+async function getGamesWithPricesFromDB(gameIds: number[], userId: string) {
+    const games = await getGamesById(gameIds, userId);
+
+    const allPrices = await getPricesForGames(gameIds);
+    const pricesByGameId = allPrices.reduce((acc, p) => {
+        if (!acc[p.game_id]) {
+            acc[p.game_id] = [];
+        }
+
+        acc[p.game_id].push(p);
+
+        return acc;
+    }, {} as Record<number, GamePriceDetails[]>);
+
+    const gamesWithPrices = games.map((game) => ({
+        ...game,
+        game_prices: pricesByGameId[game.id] || [],
+    }));
+
+    return gamesWithPrices;
 }

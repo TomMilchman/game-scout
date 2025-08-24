@@ -19,7 +19,7 @@ export interface Game {
     capsule_image: string | null;
     status: UserGameStatus | null;
     type: string;
-    game_prices: Record<StoreName, GamePriceDetails>;
+    game_prices: GamePriceDetails[] | null;
 }
 
 export type StoreName = "Steam" | "GOG";

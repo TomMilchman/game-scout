@@ -84,51 +84,68 @@ async function scrapeAndCacheGames(query: string, limit: number) {
     }
 }
 
-export async function fetchGameAndItsPrices(gameId: number, userId: string) {
+export async function fetchGamesAndPricesAndScrapeIfNeeded(
+    gameIds: number[],
+    userId: string
+) {
     try {
-        let game = (await getGamesWithPricesFromDB([gameId], userId))[0];
+        const games = await getGamesWithPricesFromDB(gameIds, userId);
 
-        if (!game || !game.game_prices) {
-            console.log(
-                "Couldn't fetch game and prices - does not exist in DB"
-            );
-            return null;
+        if (!games || games.length === 0) {
+            console.log("No games found in DB for provided ids");
+            return [];
         }
 
         const ONE_HOUR_MS = 1000 * 60 * 60;
-        const latestUpdate = Math.max(
-            ...game.game_prices.map((p) => p.last_updated?.getTime() ?? 0)
-        );
+        const now = Date.now();
 
-        if (Date.now() - latestUpdate > ONE_HOUR_MS) {
-            // Get prices from APIs and scraping
+        const staleGames: typeof games = [];
+        const freshGames: typeof games = [];
+
+        for (const game of games) {
+            const latestUpdate = Math.max(
+                ...game.game_prices.map((p) => p.last_updated?.getTime() ?? 0)
+            );
+
+            if (now - latestUpdate > ONE_HOUR_MS) {
+                staleGames.push(game);
+            } else {
+                freshGames.push(game);
+            }
+        }
+
+        // Scrape stale games in parallel
+        const scrapePromises = staleGames.map(async (game) => {
             const gamePriceDetailsAcrossStores: GamePriceDetails[] = [];
 
             const steamPriceDetails = await fetchSteamPrice(
-                gameId,
+                game.id,
                 game.steam_app_id
             );
-
             if (steamPriceDetails.base_price !== null) {
                 gamePriceDetailsAcrossStores.push(steamPriceDetails);
             }
 
-            const gogPriceDetails = await scrapeGogPrice(game.title, gameId);
-
+            const gogPriceDetails = await scrapeGogPrice(game.title, game.id);
             if (gogPriceDetails && gogPriceDetails.base_price !== null) {
                 gamePriceDetailsAcrossStores.push(gogPriceDetails);
             }
 
-            // Upsert pricing to DB
-            await upsertGamePrices(gamePriceDetailsAcrossStores);
+            if (gamePriceDetailsAcrossStores.length > 0) {
+                await upsertGamePrices(gamePriceDetailsAcrossStores);
+                game.game_prices = gamePriceDetailsAcrossStores;
+            }
 
-            // Return an updated game object
-            game = (await getGamesWithPricesFromDB([gameId], userId))[0];
-        }
+            return game;
+        });
 
-        return game;
+        const updatedStaleGames = await Promise.all(scrapePromises);
+
+        // Return both fresh and updated stale games
+        return [...freshGames, ...updatedStaleGames];
     } catch (error) {
-        console.error("fetchGameAndPricesById failed", error);
+        console.error("fetchGamesAndPricesAndScrapeIfNeeded failed", error);
+        return [];
     }
 }
 

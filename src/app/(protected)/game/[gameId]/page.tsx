@@ -1,8 +1,9 @@
-import { fetchGameAndItsPrices } from "@/app/server/games";
+import { fetchGamesAndPricesAndScrapeIfNeeded } from "@/app/server/games";
 import ChangeGameStatus from "@/components/changeGameStatus";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { FaSteam } from "react-icons/fa";
+import { IconType } from "react-icons/lib";
 import { SiGogdotcom } from "react-icons/si";
 
 export default async function GamePage({
@@ -13,7 +14,9 @@ export default async function GamePage({
     const { gameId } = await params;
     const { userId } = await auth();
 
-    const game = await fetchGameAndItsPrices(gameId, userId || "");
+    const game = (
+        await fetchGamesAndPricesAndScrapeIfNeeded([gameId], userId || "")
+    )[0];
 
     if (!game) {
         notFound();
@@ -52,7 +55,7 @@ export default async function GamePage({
                         {title}
                     </h1>
                     <p className="text-gray-300 mt-1 text-sm md:text-base">
-                        Released: {release_date}
+                        Release Date: {release_date}
                     </p>
                 </div>
                 <div className="absolute top-4 right-4 z-10">
@@ -80,12 +83,16 @@ export default async function GamePage({
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {game_prices?.map((priceData) => {
-                            const Icon =
-                                priceData.store === "Steam"
-                                    ? FaSteam
-                                    : priceData.store === "GOG"
-                                    ? SiGogdotcom
-                                    : null;
+                            let Icon: IconType;
+
+                            switch (priceData.store) {
+                                case "Steam":
+                                    Icon = FaSteam;
+                                    break;
+                                case "GOG":
+                                    Icon = SiGogdotcom;
+                                    break;
+                            }
 
                             return (
                                 <a

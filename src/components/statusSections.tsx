@@ -70,7 +70,7 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
                                             </h3>
                                         </Link>
                                         <p className="text-gray-400 text-sm">
-                                            Released: {game.release_date}
+                                            Release Date: {game.release_date}
                                         </p>
                                         <ChangeGameStatus
                                             initialStatus={

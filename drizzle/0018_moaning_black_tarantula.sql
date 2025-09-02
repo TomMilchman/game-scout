@@ -1,0 +1,1 @@
+ALTER TYPE "public"."store" ADD VALUE 'GreenManGaming';

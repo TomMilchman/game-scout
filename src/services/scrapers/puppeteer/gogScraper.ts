@@ -8,7 +8,7 @@ export async function scrapeGogPrice(
     gameId: number
 ): Promise<GamePriceDetails | null> {
     const cluster = await getCluster();
-    const slug = generateGameSlug(title);
+    const slug = generateGameSlug(title, "_");
     const url = `https://www.gog.com/en/game/${slug}`;
 
     return cluster.execute(async ({ page }: { page: Page }) => {
@@ -54,7 +54,7 @@ export async function scrapeGogPrice(
                 currency,
                 url,
                 last_updated: new Date(),
-            };
+            } as GamePriceDetails;
         } catch (error) {
             console.warn(`Failed to navigate to ${url}: ${error}`);
             return null;

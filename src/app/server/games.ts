@@ -5,7 +5,6 @@ import {
     upsertGames,
 } from "@/db/games";
 import { scrapeSteamSearch } from "@/services/scrapers/cheerio/steamScraper";
-import { getCachedQuery, upsertCachedQuery } from "@/db/cached_queries";
 import { normalizeQuery } from "@/utils/generalUtils";
 import {
     fetchSteamPrice,
@@ -14,8 +13,10 @@ import {
 import { GamePriceDetails } from "../types";
 import { getPricesForGames, upsertGamePrices } from "@/db/prices";
 import { scrapeGogPrice } from "@/services/scrapers/puppeteer/gogScraper";
+import { getCachedQuery, upsertCachedQuery } from "@/db/cached_queries";
+import { scrapeGMGPrice } from "@/services/scrapers/puppeteer/gmgScraper";
 
-export async function fetchGames(query: string, userId: string) {
+export async function fetchGamesForSearchQuery(query: string, userId: string) {
     try {
         query = normalizeQuery(query);
         const limit = 50;
@@ -84,7 +85,7 @@ async function scrapeAndCacheGames(query: string, limit: number) {
     }
 }
 
-export async function fetchGamesAndPricesAndScrapeIfNeeded(
+export async function fetchGamesAndPricesByIdsAndScrapeIfNeeded(
     gameIds: number[],
     userId: string
 ) {
@@ -129,6 +130,16 @@ export async function fetchGamesAndPricesAndScrapeIfNeeded(
             const gogPriceDetails = await scrapeGogPrice(game.title, game.id);
             if (gogPriceDetails && gogPriceDetails.base_price !== null) {
                 gamePriceDetailsAcrossStores.push(gogPriceDetails);
+            }
+
+            if (gamePriceDetailsAcrossStores.length > 0) {
+                await upsertGamePrices(gamePriceDetailsAcrossStores);
+                game.game_prices = gamePriceDetailsAcrossStores;
+            }
+
+            const gmgPriceDetails = await scrapeGMGPrice(game.title, game.id);
+            if (gmgPriceDetails && gmgPriceDetails.base_price !== null) {
+                gamePriceDetailsAcrossStores.push(gmgPriceDetails);
             }
 
             if (gamePriceDetailsAcrossStores.length > 0) {

@@ -1,7 +1,9 @@
-import { fetchGamesAndPricesAndScrapeIfNeeded } from "@/app/server/games";
+import { fetchGamesAndPricesByIdsAndScrapeIfNeeded } from "@/app/server/games";
 import ChangeGameStatus from "@/components/changeGameStatus";
+import { GMGIcon } from "@/components/gmgIcon";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
+import { FC, SVGProps } from "react";
 import { FaSteam } from "react-icons/fa";
 import { IconType } from "react-icons/lib";
 import { SiGogdotcom } from "react-icons/si";
@@ -15,7 +17,7 @@ export default async function GamePage({
     const { userId } = await auth();
 
     const game = (
-        await fetchGamesAndPricesAndScrapeIfNeeded([gameId], userId || "")
+        await fetchGamesAndPricesByIdsAndScrapeIfNeeded([gameId], userId || "")
     )[0];
 
     if (!game) {
@@ -83,7 +85,7 @@ export default async function GamePage({
                     </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {game_prices?.map((priceData) => {
-                            let Icon: IconType;
+                            let Icon: FC<SVGProps<SVGSVGElement>> | null = null;
 
                             switch (priceData.store) {
                                 case "Steam":
@@ -91,6 +93,9 @@ export default async function GamePage({
                                     break;
                                 case "GOG":
                                     Icon = SiGogdotcom;
+                                    break;
+                                case "GreenManGaming":
+                                    Icon = GMGIcon;
                                     break;
                             }
 

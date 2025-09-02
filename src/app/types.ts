@@ -22,7 +22,7 @@ export interface Game {
     game_prices: GamePriceDetails[] | null;
 }
 
-export type StoreName = "Steam" | "GOG";
+export type StoreName = "Steam" | "GOG" | "GreenManGaming";
 
 export interface GamePriceDetails {
     game_id: number;

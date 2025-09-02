@@ -19,7 +19,7 @@ export const statusEnum = pgEnum("status", [
     "Dropped",
 ]);
 
-export const storeEnum = pgEnum("store", ["Steam", "GOG"]);
+export const storeEnum = pgEnum("store", ["Steam", "GOG", "GreenManGaming"]);
 
 export const games = pgTable("games", {
     id: serial("id").primaryKey(),

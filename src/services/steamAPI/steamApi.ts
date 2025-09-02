@@ -31,7 +31,8 @@ export async function fetchSteamPrice(gameId: number, steamAppId: number) {
             : null,
         currency: priceOverview ? priceOverview.currency : undefined,
         url: `https://store.steampowered.com/app/${steamAppId}/${generateGameSlug(
-            gameDetails.name
+            gameDetails.name,
+            "_"
         )}`,
         last_updated: new Date(),
     } as GamePriceDetails;

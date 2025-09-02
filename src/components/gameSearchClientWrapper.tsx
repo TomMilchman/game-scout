@@ -19,7 +19,7 @@ export default function GameSearchClientWrapper({
     userId: string;
 }) {
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortOption, setSortOption] = useState<SortOption>("name-asc");
+    const [sortOption, setSortOption] = useState<SortOption>("no-filter");
 
     const filteredGames = useMemo(() => {
         let result = [...games];

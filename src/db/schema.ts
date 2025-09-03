@@ -29,7 +29,6 @@ export const games = pgTable("games", {
     release_date: varchar("release_date", { length: 24 }),
     header_image: text("header_image"),
     capsule_image: text("capsule_image"),
-    type: varchar("type", { length: 24 }),
     last_updated: timestamp("last_updated").notNull().defaultNow(),
 });
 

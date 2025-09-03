@@ -9,15 +9,8 @@ export default function GameSearchRow({
     game: Game;
     userId: string;
 }) {
-    const {
-        id,
-        type,
-        title,
-        release_date,
-        status,
-        capsule_image,
-        header_image,
-    } = game;
+    const { id, title, release_date, status, capsule_image, header_image } =
+        game;
 
     return (
         <div className="flex items-center gap-4 bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg transition">
@@ -40,11 +33,6 @@ export default function GameSearchRow({
                             {title}
                         </h3>
                     </Link>
-                    {type && (
-                        <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-700 text-gray-200">
-                            {type}
-                        </span>
-                    )}
 
                     <p className="text-gray-400 text-sm md:text-base">
                         Released: {release_date}

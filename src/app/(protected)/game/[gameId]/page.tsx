@@ -23,7 +23,6 @@ export default async function GamePage({
         title,
         steam_app_id,
         description,
-        type,
         release_date,
         header_image,
         status,
@@ -50,13 +49,6 @@ export default async function GamePage({
                     <p className="text-gray-300 mt-1 text-sm md:text-base">
                         Release Date: {release_date}
                     </p>
-                </div>
-                <div className="absolute top-4 right-4 z-10">
-                    {type && (
-                        <span className="px-3 py-1 text-sm font-semibold rounded-full bg-blue-600 text-white capitalize shadow-md">
-                            {type}
-                        </span>
-                    )}
                 </div>
             </div>
 

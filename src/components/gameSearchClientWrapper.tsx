@@ -84,7 +84,7 @@ export default function GameSearchClientWrapper({
             </div>
 
             {/* Results */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mx-2.5 mb-2.5">
                 {filteredGames.map((game) => (
                     <GameSearchRow
                         key={game.id}

@@ -10,7 +10,8 @@ export async function fetchSteamGamesDetails(gameIds: number[]) {
 
     return gamesDetails
         .filter((r) => r.status === "fulfilled")
-        .map((r) => (r as PromiseFulfilledResult<GameDetails>).value);
+        .map((r) => (r as PromiseFulfilledResult<GameDetails>).value)
+        .filter((g) => g.type === "game");
 }
 
 export async function fetchSteamPrice(gameId: number, steamAppId: number) {

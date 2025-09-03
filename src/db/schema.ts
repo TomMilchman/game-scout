@@ -30,6 +30,7 @@ export const games = pgTable("games", {
     header_image: text("header_image"),
     capsule_image: text("capsule_image"),
     type: varchar("type", { length: 24 }),
+    last_updated: timestamp("last_updated").notNull().defaultNow(),
 });
 
 export const prices = pgTable(
@@ -69,9 +70,3 @@ export const userGames = pgTable(
     },
     (table) => [unique("unique_user_game").on(table.user_id, table.game_id)]
 );
-
-export const cachedQueries = pgTable("cached_queries", {
-    query: text("query").primaryKey(),
-    scraped_at: timestamp("scraped_at").notNull(),
-    total_Games: integer("total_games").notNull().default(0),
-});

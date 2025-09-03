@@ -19,6 +19,12 @@ export async function scrapeGogPrice(
 
             if (!response || !response.ok()) return null;
 
+            const ageBlock = await page.$("div.age-gate.ng-scope");
+
+            if (ageBlock) {
+                page.click("button.age-gate__button");
+            }
+
             const { basePrice, discountedPrice, currency } =
                 await page.evaluate(() => {
                     const baseEl = document.querySelector(

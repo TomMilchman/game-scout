@@ -6,7 +6,7 @@ import { Page } from "puppeteer";
 export async function scrapeGMGPrice(title: string, gameId: number) {
     const cluster = await getCluster();
     const slug = generateGameSlug(title, "-");
-    let url = `https://www.greenmangaming.com/games/${slug}`;
+    let url = `https://www.greenmangaming.com/games/${slug}-pc`;
 
     return cluster.execute(async ({ page }: { page: Page }) => {
         try {
@@ -14,15 +14,33 @@ export async function scrapeGMGPrice(title: string, gameId: number) {
                 waitUntil: "domcontentloaded",
             });
 
-            if (!response || !response.ok()) {
-                url = `https://www.greenmangaming.com/games/${slug}-pc`;
+            if (
+                !response ||
+                !response.ok() ||
+                page.url().includes("title-no-longer-available")
+            ) {
+                url = `https://www.greenmangaming.com/games/${slug}`;
                 response = await page.goto(url, {
                     waitUntil: "domcontentloaded",
                 });
 
-                if (!response || !response.ok()) {
+                if (
+                    !response ||
+                    !response.ok() ||
+                    page.url().includes("title-no-longer-available")
+                ) {
                     return null;
                 }
+            }
+
+            const ageModal = await page.$("div#birth-date-modal");
+
+            if (ageModal) {
+                await page.select("select#day", "01");
+                await page.select("select#month", "01");
+                await page.select("select#year", "2000");
+                await page.click("btn.btn-success");
+                await page.waitForNavigation();
             }
 
             const { basePrice, currentPrice, currency } = await page.evaluate(

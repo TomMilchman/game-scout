@@ -1,0 +1,1 @@
+DROP TABLE "cached_queries" CASCADE;

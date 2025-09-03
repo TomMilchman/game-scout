@@ -25,6 +25,7 @@ export async function getGamesById(gameIds: number[], userId: string) {
         type: r.type,
         status: r.status,
         game_prices: null,
+        last_updated: r.last_updated,
     }));
 
     return games;
@@ -53,15 +54,20 @@ export async function upsertGames(games: GameDetails[]) {
         games.map(
             (game) =>
                 sql`
-                    INSERT INTO games (steam_app_id, title, description, type, release_date, header_image, capsule_image)
-                    VALUES (${game.id}, ${game.name}, ${game.shortDescription}, ${game.type}, ${game.releaseDate?.date}, ${game.headerImage}, ${game.capsuleImage})
+                    INSERT INTO games (steam_app_id, title, description, type, release_date, header_image, capsule_image, last_updated)
+                    VALUES (${game.id}, ${game.name}, ${
+                    game.shortDescription
+                }, ${game.type}, ${game.releaseDate?.date}, ${
+                    game.headerImage
+                }, ${game.capsuleImage}, ${new Date()})
                     ON CONFLICT (steam_app_id) DO
                     UPDATE SET
                         title = EXCLUDED.title,
                         description = EXCLUDED.description,
                         type = EXCLUDED.type,
                         header_image = EXCLUDED.header_image,
-                        capsule_image = EXCLUDED.capsule_image
+                        capsule_image = EXCLUDED.capsule_image,
+                        last_updated = EXCLUDED.last_updated
                 `
         )
     );

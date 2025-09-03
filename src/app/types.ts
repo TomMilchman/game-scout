@@ -19,7 +19,7 @@ export interface Game {
     capsule_image: string | null;
     status: UserGameStatus | null;
     type: string;
-    game_prices: GamePriceDetails[] | null;
+    last_updated: Date;
 }
 
 export type StoreName = "Steam" | "GOG" | "GreenManGaming";

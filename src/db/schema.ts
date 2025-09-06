@@ -66,6 +66,24 @@ export const userGames = pgTable(
             onDelete: "cascade",
         }),
         status: statusEnum("status").notNull().default("Never Played"),
+        status_change_date: timestamp("status_change_date")
+            .defaultNow()
+            .notNull(),
     },
     (table) => [unique("unique_user_game").on(table.user_id, table.game_id)]
+);
+
+export const wishlist = pgTable(
+    "wishlists",
+    {
+        id: serial("id").primaryKey(),
+        user_id: varchar("user_id").references(() => users.id, {
+            onDelete: "cascade",
+        }),
+        game_id: integer("game_id").references(() => games.id, {
+            onDelete: "cascade",
+        }),
+        added_at: timestamp("added_at").defaultNow().notNull(),
+    },
+    (table) => [unique("unique_user_wishlist").on(table.user_id, table.game_id)]
 );

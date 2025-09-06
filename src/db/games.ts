@@ -1,3 +1,5 @@
+"use server";
+
 import sql from "@/lib/db";
 import { GameDetails } from "steamapi";
 import { Game } from "@/app/types";
@@ -23,6 +25,7 @@ export async function getGamesById(gameIds: number[], userId: string) {
         header_image: r.header_image,
         capsule_image: r.capsule_image,
         status: r.status,
+        status_change_date: r.status_change_date,
         last_updated: r.last_updated,
     }));
 

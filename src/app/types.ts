@@ -18,6 +18,7 @@ export interface Game {
     header_image: string;
     capsule_image: string | null;
     status: UserGameStatus | null;
+    status_change_date: Date | null;
     last_updated: Date;
 }
 

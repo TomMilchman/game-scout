@@ -22,10 +22,15 @@ export default function GamePrices({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchPricesForGames([{ gameId, title, steamAppId }]).then((data) => {
+        const fetchPrices = async () => {
+            const data = await fetchPricesForGames([
+                { gameId, title, steamAppId },
+            ]);
             setPrices(data[gameId] || []);
             setLoading(false);
-        });
+        };
+
+        fetchPrices();
     }, [gameId, steamAppId, title]);
 
     return (

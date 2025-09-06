@@ -13,7 +13,7 @@ export default function ChangeGameStatus({
     initialStatus: UserGameStatus;
     userId: string;
     gameId: number;
-    onStatusChange?: (newStatus: UserGameStatus) => void;
+    onStatusChange?: (newStatus: UserGameStatus, changeDate: Date) => void;
 }) {
     const [status, setStatus] = useState(initialStatus);
 
@@ -23,8 +23,9 @@ export default function ChangeGameStatus({
         setStatus(newStatus);
 
         try {
-            await upsertUserGameStatus(userId, gameId, newStatus);
-            onStatusChange?.(newStatus);
+            const changeDate = new Date();
+            await upsertUserGameStatus(userId, gameId, newStatus, changeDate);
+            onStatusChange?.(newStatus, changeDate);
         } catch (err) {
             console.error("Failed to update status", err);
             setStatus(prevStatus);

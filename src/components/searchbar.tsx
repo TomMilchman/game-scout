@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 
 export default function SearchBar() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -32,13 +33,13 @@ export default function SearchBar() {
             />
             <button
                 onClick={handleSearch}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-r-lg shadow-md transition flex items-center justify-center"
+                className="px-4 py-2 cursor-pointer bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded-r-lg shadow-md transition flex items-center justify-center"
                 disabled={isPending}
             >
                 {isPending ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 cursor border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                    "Search"
+                    <FaMagnifyingGlass />
                 )}
             </button>
         </div>

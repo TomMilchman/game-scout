@@ -1,9 +1,11 @@
 import { fetchGamesByIdsOrScrape } from "@/app/server/games";
-import ChangeGameStatus from "@/components/changeGameStatus";
 import GamePrices from "@/components/gamePrices";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { isGameInUserWishlist } from "@/db/wishlist";
+import GameActions from "@/components/gameActions";
 
 export default async function GamePage({
     params,
@@ -13,24 +15,19 @@ export default async function GamePage({
     const { gameId } = await params;
     const { userId } = await auth();
 
-    const game = (await fetchGamesByIdsOrScrape([gameId], userId || ""))[0];
+    if (!userId) {
+        redirect("/auth/log-in");
+    }
+
+    const game = (await fetchGamesByIdsOrScrape([gameId], userId))[0];
+    const isWishlisted = await isGameInUserWishlist(userId, gameId);
 
     if (!game) {
         notFound();
     }
 
-    const {
-        title,
-        steam_app_id,
-        description,
-        release_date,
-        header_image,
-        status,
-    } = game;
-
-    const canChangeStatus = release_date
-        ? new Date(release_date) <= new Date()
-        : false;
+    const { title, steam_app_id, description, release_date, header_image } =
+        game;
 
     return (
         <div className="max-w-5xl mx-auto p-6">
@@ -47,7 +44,7 @@ export default async function GamePage({
                         {title}
                     </h1>
                     <p className="text-gray-300 mt-1 text-sm md:text-base">
-                        Release Date: {release_date}
+                        Release: {release_date}
                     </p>
                 </div>
             </div>
@@ -70,18 +67,12 @@ export default async function GamePage({
             </Suspense>
 
             {/* Bottom Buttons */}
-            <section className="flex gap-4">
-                {canChangeStatus && (
-                    <ChangeGameStatus
-                        initialStatus={status || "Never Played"}
-                        gameId={gameId}
-                        userId={userId || ""}
-                    />
-                )}
-                <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition">
-                    Add to Wishlist
-                </button>
-            </section>
+            <GameActions
+                gameId={game.id}
+                userId={userId}
+                initialStatus={game.status || "Never Played"}
+                initialWishlisted={isWishlisted}
+            />
         </div>
     );
 }

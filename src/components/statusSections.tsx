@@ -16,7 +16,8 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
     const handleStatusChange = (
         gameId: number,
         oldStatus: UserGameStatus,
-        newStatus: UserGameStatus
+        newStatus: UserGameStatus,
+        changeDate: Date
     ) => {
         setGroups((prev) => {
             const newGroups = { ...prev };
@@ -27,7 +28,13 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
             if (gameIndex !== -1) {
                 const [game] = newGroups[oldStatus].splice(gameIndex, 1);
                 game.status = newStatus;
+                game.status_change_date = changeDate;
                 newGroups[newStatus].push(game);
+                newGroups[newStatus].sort(
+                    (a, b) =>
+                        (b.status_change_date?.getTime() ?? 0) -
+                        (a.status_change_date?.getTime() ?? 0)
+                );
             }
 
             return newGroups;
@@ -70,23 +77,36 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
                                             </h3>
                                         </Link>
                                         <p className="text-gray-400 text-sm">
-                                            Release Date: {game.release_date}
+                                            Release: {game.release_date}
                                         </p>
                                         <ChangeGameStatus
                                             initialStatus={
                                                 game.status || "Never Played"
                                             }
                                             gameId={game.id}
-                                            userId={userId || ""}
-                                            onStatusChange={(newStatus) =>
+                                            userId={userId}
+                                            onStatusChange={(
+                                                newStatus,
+                                                changeDate
+                                            ) =>
                                                 handleStatusChange(
                                                     game.id,
                                                     game.status ||
                                                         "Never Played",
-                                                    newStatus
+                                                    newStatus,
+                                                    changeDate
                                                 )
                                             }
                                         />
+                                        <div className="mx-auto text-gray-500 text-xs">
+                                            {game.status_change_date &&
+                                                `Status Updated:
+                                                ${
+                                                    game.status_change_date
+                                                        .toLocaleDateString()
+                                                        .split(" ")[0]
+                                                }`}
+                                        </div>
                                     </div>
                                 </div>
                             ))}

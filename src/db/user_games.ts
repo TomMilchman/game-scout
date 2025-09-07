@@ -48,3 +48,21 @@ export async function getUserGames(userId: string) {
 
     return grouped;
 }
+
+export async function getUserGameStatus(
+    userId: string,
+    gameId: number
+): Promise<UserGameStatus> {
+    const rows = await sql`
+    SELECT status FROM user_games
+    WHERE user_id = ${userId} AND game_id = ${gameId};
+  `;
+
+    const res = rows[0];
+
+    if (!res) {
+        return "Never Played";
+    }
+
+    return res.status;
+}

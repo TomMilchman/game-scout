@@ -1,5 +1,4 @@
 import { fetchGamesForSearchQuery } from "@/app/server/games";
-import { Game } from "@/app/types";
 import GameSearchClientWrapper from "@/components/gameSearchClientWrapper";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -16,7 +15,19 @@ export default async function SearchPage({
         redirect("/auth/log-in");
     }
 
-    const games: Game[] = await fetchGamesForSearchQuery(query || "", userId);
+    const result = await fetchGamesForSearchQuery(query || "", userId);
+
+    if (!result.success) {
+        console.error("Failed to fetch games:", result.error);
+
+        return (
+            <p className="text-red-500">
+                Failed to fetch games. Please try again later.
+            </p>
+        );
+    }
+
+    const games = result.data ?? [];
 
     return (
         <div>

@@ -1,3 +1,18 @@
+import { ActionResult } from "@/app/types";
+
+export async function executeAction<T>(
+    fn: () => Promise<T>
+): Promise<ActionResult<T>> {
+    try {
+        const data = await fn();
+        return { success: true, data };
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Error encountered: ", message);
+        return { success: false, error: message };
+    }
+}
+
 export function normalizeQuery(query: string) {
     return query
         .trim() // remove leading/trailing spaces

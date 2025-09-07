@@ -19,13 +19,21 @@ export default async function GamePage({
         redirect("/auth/log-in");
     }
 
-    const game = (await fetchGamesByIdsOrScrape([gameId], userId))[0];
-    const isWishlisted = await isGameInUserWishlist(userId, gameId);
+    const result = await fetchGamesByIdsOrScrape([gameId], userId);
 
-    if (!game) {
+    if (!result.success) {
+        console.error("Failed to fetch game:", result.error);
         notFound();
     }
 
+    const game = result.data?.[0];
+
+    if (!game) {
+        console.warn("Game not found for id:", gameId);
+        notFound();
+    }
+
+    const isWishlisted = await isGameInUserWishlist(userId, gameId);
     const { title, steam_app_id, description, release_date, header_image } =
         game;
 
@@ -40,7 +48,7 @@ export default async function GamePage({
                 />
                 <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/100 to-transparent" />
                 <div className="absolute bottom-4 left-4 z-10">
-                    <h1 className="text-3xl md:text-5xl font-bold text-white">
+                    <h1 className="text-3xl md:text-5xl font-bold text-white truncate">
                         {title}
                     </h1>
                     <p className="text-gray-300 mt-1 text-sm md:text-base">

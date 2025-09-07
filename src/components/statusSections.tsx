@@ -72,7 +72,7 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
                                     </Link>
                                     <div className="p-3 flex flex-col gap-2">
                                         <Link href={`/game/${game.id}`}>
-                                            <h3 className="text-white font-semibold hover:underline">
+                                            <h3 className="text-white font-semibold hover:underline truncate">
                                                 {game.title}
                                             </h3>
                                         </Link>

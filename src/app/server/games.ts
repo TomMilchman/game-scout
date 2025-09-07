@@ -2,16 +2,18 @@
 
 import { getGamesById, searchGamesByName, upsertGames } from "@/db/games";
 import { scrapeSteamSearch } from "@/services/scrapers/cheerio/steamScraper";
-import { normalizeQuery } from "@/utils/generalUtils";
+import { executeAction, normalizeQuery } from "@/utils/generalUtils";
 import {
     fetchSteamPrice,
     fetchSteamGamesDetails,
 } from "@/services/steamAPI/steamApi";
-import { Game, GamePriceDetails } from "../types";
+import { ActionResult, Game, GamePriceDetails, UserGameStatus } from "../types";
 import { getPricesForGames, upsertGamePrices } from "@/db/prices";
 import { scrapeGogPrice } from "@/services/scrapers/puppeteer/gogScraper";
 import { scrapeGMGPrice } from "@/services/scrapers/puppeteer/gmgScraper";
 import { GameDetails } from "steamapi";
+import { getUserGameStatus, upsertUserGameStatus } from "@/db/user_games";
+import { addToWishlist, removeFromWishlist } from "@/db/wishlist";
 
 const GAME_DETAILS_REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24; // 1 day
 const GAME_PRICE_REFRESH_THRESHOLD_MS = 1000 * 60 * 60; // 1 hour
@@ -19,8 +21,11 @@ const GAME_PRICE_REFRESH_THRESHOLD_MS = 1000 * 60 * 60; // 1 hour
 /**
  * Fetch games for a search query (metadata only), handling missing and stale separately.
  */
-export async function fetchGamesForSearchQuery(query: string, userId: string) {
-    try {
+export async function fetchGamesForSearchQuery(
+    query: string,
+    userId: string
+): Promise<ActionResult<Game[]>> {
+    return executeAction(async () => {
         query = normalizeQuery(query);
         const limit = 50;
 
@@ -49,10 +54,9 @@ export async function fetchGamesForSearchQuery(query: string, userId: string) {
         }
 
         // Step 5: Refresh stale games
-        const staleGamesDetailsAndIds = await fetchStaleGamesDetails(
-            games,
-            Date.now()
-        );
+        const staleGamesDetailsAndIds = (
+            await fetchStaleGamesDetails(games, Date.now())
+        ).data;
         const staleGameDetails = staleGamesDetailsAndIds?.map((g) => g.details);
 
         if (staleGameDetails && staleGameDetails.length > 0) {
@@ -66,75 +70,75 @@ export async function fetchGamesForSearchQuery(query: string, userId: string) {
         games = await searchGamesByName(query, userId, limit);
 
         return games;
-    } catch (error) {
-        console.error("fetchGamesForSearchQuery failed:", error);
-        return [];
-    }
+    });
 }
 
-async function fetchStaleGamesDetails(games: Game[], updateTime: number) {
-    const staleGames = games.filter(
-        (g) =>
-            !g.last_updated ||
-            updateTime - g.last_updated.getTime() >
-                GAME_DETAILS_REFRESH_THRESHOLD_MS
-    );
+async function fetchStaleGamesDetails(
+    games: Game[],
+    updateTime: number
+): Promise<ActionResult<{ steam_app_id: number; details: GameDetails }[]>> {
+    return executeAction(async () => {
+        const staleGames = games.filter(
+            (g) =>
+                !g.last_updated ||
+                updateTime - g.last_updated.getTime() >
+                    GAME_DETAILS_REFRESH_THRESHOLD_MS
+        );
 
-    if (staleGames.length > 0) {
-        try {
-            const staleIds = staleGames.map((g) => g.steam_app_id);
-            const detailsArray = await fetchSteamGamesDetails(staleIds);
+        if (staleGames.length === 0) return [];
 
-            const result = staleGames.map((game, idx) => ({
-                steam_app_id: game.steam_app_id,
-                details: detailsArray[idx],
-            }));
+        const staleIds = staleGames.map((g) => g.steam_app_id);
+        const detailsArray = await fetchSteamGamesDetails(staleIds);
 
-            return result || [];
-        } catch (err) {
-            console.error("Failed to refresh stale games", err);
-            return null;
-        }
-    }
+        return staleGames.map((game, idx) => ({
+            steam_app_id: game.steam_app_id,
+            details: detailsArray[idx],
+        }));
+    });
 }
 
 export async function fetchGamesByIdsOrScrape(
     gameIds: number[],
     userId: string
-) {
-    try {
+): Promise<ActionResult<Game[]>> {
+    return executeAction(async () => {
         const now = Date.now();
         const games = await getGamesById(gameIds, userId);
-        const updatedStaleGamesDetailsAndIds = await fetchStaleGamesDetails(
-            games,
-            now
-        );
 
-        if (updatedStaleGamesDetailsAndIds) {
-            // Map stale games by their ID for easy lookup
-            const staleMap = new Map<number, GameDetails>();
-            updatedStaleGamesDetailsAndIds.forEach((g) => {
-                staleMap.set(g.steam_app_id, g.details);
-            });
+        const staleResult = await fetchStaleGamesDetails(games, now);
 
-            // Replace stale games in the original array
-            const mergedGames = games.map((game) =>
-                staleMap.has(game.steam_app_id)
-                    ? { ...game, ...staleMap.get(game.steam_app_id)! }
-                    : game
+        if (!staleResult.success) {
+            console.warn(
+                "Failed to fetch stale game details:",
+                staleResult.error
             );
-
-            // Upsert the newly fetched stale game details into DB
-            await upsertGames(Array.from(staleMap.values()));
-
-            return mergedGames;
+            // Even if stale fetch fails, return the original games
+            return games;
         }
 
-        return games;
-    } catch (error) {
-        console.error("fetchGamesByIdsOrScrape failed:", error);
-        return [];
-    }
+        const updatedStaleGamesDetailsAndIds = staleResult.data;
+        if (updatedStaleGamesDetailsAndIds?.length === 0) {
+            return games;
+        }
+
+        // Map stale games by their ID for easy lookup
+        const staleMap = new Map<number, GameDetails>();
+        updatedStaleGamesDetailsAndIds?.forEach((g) => {
+            staleMap.set(g.steam_app_id, g.details);
+        });
+
+        // Replace stale games in the original array
+        const mergedGames = games.map((game) =>
+            staleMap.has(game.steam_app_id)
+                ? { ...game, ...staleMap.get(game.steam_app_id)! }
+                : game
+        );
+
+        // Upsert the newly fetched stale game details into DB
+        await upsertGames(Array.from(staleMap.values()));
+
+        return mergedGames;
+    });
 }
 
 /**
@@ -143,8 +147,8 @@ export async function fetchGamesByIdsOrScrape(
  */
 export async function fetchPricesForGames(
     gameIdsAndTitles: { gameId: number; title: string; steamAppId: number }[]
-) {
-    try {
+): Promise<ActionResult<Record<number, GamePriceDetails[]>>> {
+    return executeAction(async () => {
         const gameIds = gameIdsAndTitles.map((obj) => obj.gameId);
 
         // Fetch existing prices from DB
@@ -176,7 +180,6 @@ export async function fetchPricesForGames(
         const scrapePromises = gameIdsAndTitles.map(
             async ({ gameId, title, steamAppId }) => {
                 const prices = pricesByGameId[gameId];
-
                 const latestUpdate = Math.max(
                     ...(prices?.map((p) => p.last_updated?.getTime() ?? 0) ?? [
                         0,
@@ -187,7 +190,6 @@ export async function fetchPricesForGames(
                     !prices ||
                     prices.length === 0 ||
                     now - latestUpdate > GAME_PRICE_REFRESH_THRESHOLD_MS;
-
                 if (!needsScrape) return;
 
                 const scrapedPrices: GamePriceDetails[] = [];
@@ -211,11 +213,9 @@ export async function fetchPricesForGames(
                 );
                 if (gmgPrice?.base_price != null) scrapedPrices.push(gmgPrice);
 
-                // Only insert valid prices
                 const validPrices = scrapedPrices.filter(
                     (p) => p && p.game_id != null
                 );
-
                 if (validPrices.length > 0) {
                     await upsertGamePrices(validPrices);
                     updatedPrices[gameId] = validPrices;
@@ -224,10 +224,46 @@ export async function fetchPricesForGames(
         );
 
         await Promise.all(scrapePromises);
-
         return updatedPrices;
-    } catch (error) {
-        console.error("fetchPricesForGames failed:", error);
-        return {};
-    }
+    });
+}
+
+export async function changeUserGameStatus(
+    userId: string,
+    gameId: number,
+    prevStatus: UserGameStatus,
+    newStatus: UserGameStatus,
+    changeDate: Date
+): Promise<ActionResult<void>> {
+    return executeAction(async () => {
+        if (prevStatus === "Never Played") {
+            await removeFromWishlist(userId, gameId);
+        }
+
+        await upsertUserGameStatus(userId, gameId, newStatus, changeDate);
+    });
+}
+
+export async function toggleWishlist(
+    userId: string,
+    gameId: number,
+    enabled: boolean
+): Promise<ActionResult<boolean>> {
+    return executeAction(async () => {
+        const status = await getUserGameStatus(userId, gameId);
+
+        if (status !== "Never Played") {
+            throw new Error(
+                "Can only toggle wishlist for games that have never been played"
+            );
+        }
+
+        if (enabled) {
+            await removeFromWishlist(userId, gameId);
+            return false;
+        } else {
+            await addToWishlist(userId, gameId);
+            return true;
+        }
+    });
 }

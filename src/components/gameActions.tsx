@@ -27,7 +27,13 @@ export default function GameActions({
                 initialStatus={status}
                 gameId={gameId}
                 userId={userId}
-                onStatusChange={(newStatus) => setStatus(newStatus)}
+                onStatusChange={(newStatus) => {
+                    setStatus(newStatus);
+
+                    if (newStatus !== "Never Played") {
+                        setIsWishlisted(false);
+                    }
+                }}
             />
             <WishlistButton
                 status={status}

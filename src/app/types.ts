@@ -1,3 +1,9 @@
+export type ActionResult<T = undefined> = {
+    success: boolean;
+    error?: string;
+    data?: T;
+};
+
 export const userGameStatuses = [
     "Never Played",
     "Playing",

@@ -20,96 +20,99 @@ export default function GamePrices({
 }) {
     const [prices, setPrices] = useState<GamePriceDetails[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchPrices = async () => {
-            const data = await fetchPricesForGames([
+            setLoading(true);
+            setError(null);
+
+            const result = await fetchPricesForGames([
                 { gameId, title, steamAppId },
             ]);
-            setPrices(data[gameId] || []);
+
+            if (result.success) {
+                setPrices(result.data?.[gameId] ?? []);
+            } else {
+                setPrices([]);
+                setError(result.error ?? "Failed to fetch prices.");
+            }
+
             setLoading(false);
         };
 
         fetchPrices();
     }, [gameId, steamAppId, title]);
 
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-16">
+                <Spinner small />
+            </div>
+        );
+    }
+
+    if (error) {
+        return <p className="text-red-500">{error}</p>;
+    }
+
+    if (prices.length === 0) {
+        return <p className="text-gray-400">No prices available.</p>;
+    }
+
     return (
-        <div>
-            <section className="bg-gray-800 rounded-lg p-6 shadow-md mb-6">
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                    Price Comparison
-                </h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+            {prices.map((priceData) => {
+                let Icon: FC<SVGProps<SVGSVGElement>> | null = null;
+                switch (priceData.store) {
+                    case "Steam":
+                        Icon = FaSteam;
+                        break;
+                    case "GOG":
+                        Icon = SiGogdotcom;
+                        break;
+                    case "GreenManGaming":
+                        Icon = GMGIcon;
+                        break;
+                }
 
-                {loading ? (
-                    <div className="flex justify-center items-center h-16">
-                        <Spinner small={true} />
-                    </div>
-                ) : prices.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {prices.map((priceData) => {
-                            let Icon: FC<SVGProps<SVGSVGElement>> | null = null;
-
-                            switch (priceData.store) {
-                                case "Steam":
-                                    Icon = FaSteam;
-                                    break;
-                                case "GOG":
-                                    Icon = SiGogdotcom;
-                                    break;
-                                case "GreenManGaming":
-                                    Icon = GMGIcon;
-                                    break;
-                            }
-
-                            return (
-                                <a
-                                    key={priceData.store}
-                                    href={priceData.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center justify-between p-3 bg-gray-700 rounded-lg shadow hover:bg-gray-600 transition"
-                                >
-                                    <div className="flex items-center">
-                                        {Icon && (
-                                            <Icon className="w-6 h-6 mr-2" />
-                                        )}
-                                        <span className="font-semibold text-white">
-                                            {priceData.store}
-                                        </span>
-                                    </div>
-                                    <div className="text-right">
-                                        {priceData.current_price <
-                                        priceData.base_price ? (
-                                            <>
-                                                <span className="line-through text-gray-400 mr-2">
-                                                    {priceData.base_price}
-                                                </span>
-                                                <span className="text-green-400 font-bold">
-                                                    {Number(
-                                                        priceData.current_price
-                                                    ) === 0
-                                                        ? "Free"
-                                                        : priceData.current_price}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <span className="text-white">
-                                                {Number(
-                                                    priceData.current_price
-                                                ) === 0
-                                                    ? "Free"
-                                                    : priceData.current_price}
-                                            </span>
-                                        )}
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <p className="text-gray-400">No prices available.</p>
-                )}
-            </section>
+                return (
+                    <a
+                        key={priceData.store}
+                        href={priceData.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 bg-gray-700 rounded-lg shadow hover:bg-gray-600 transition"
+                    >
+                        <div className="flex items-center">
+                            {Icon && <Icon className="w-6 h-6 mr-2" />}
+                            <span className="font-semibold text-white">
+                                {priceData.store}
+                            </span>
+                        </div>
+                        <div className="text-right">
+                            {priceData.current_price < priceData.base_price ? (
+                                <>
+                                    <span className="line-through text-gray-400 mr-2">
+                                        {priceData.base_price}
+                                    </span>
+                                    <span className="text-green-400 font-bold">
+                                        {Number(priceData.current_price) === 0
+                                            ? "Free"
+                                            : priceData.current_price}
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-white">
+                                    {Number(priceData.current_price) === 0
+                                        ? "Free"
+                                        : priceData.current_price}
+                                </span>
+                            )}
+                        </div>
+                    </a>
+                );
+            })}
         </div>
     );
 }

@@ -1,5 +1,6 @@
 import { fetchGamesForSearchQuery } from "@/app/server/games";
 import GameSearchClientWrapper from "@/components/gameSearchClientWrapper";
+import { areGamesInUserWishlist } from "@/db/wishlist";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
@@ -28,10 +29,20 @@ export default async function SearchPage({
     }
 
     const games = result.data ?? [];
+    const gameIds = games.map((g) => g.id);
+
+    const wishlistStatusByGameId = await areGamesInUserWishlist(
+        userId,
+        gameIds
+    );
 
     return (
         <div>
-            <GameSearchClientWrapper games={games} userId={userId} />
+            <GameSearchClientWrapper
+                games={games}
+                userId={userId}
+                wishlistStatusByGameId={wishlistStatusByGameId}
+            />
         </div>
     );
 }

@@ -27,13 +27,27 @@ export async function removeFromWishlist(userId: string, gameId: number) {
     `;
 }
 
-export async function isGameInUserWishlist(userId: string, gameId: number) {
+export async function areGamesInUserWishlist(
+    userId: string,
+    gameIds: number[]
+): Promise<Record<number, boolean>> {
+    if (gameIds.length === 0) return {};
+
     const result = await sql`
-    SELECT 1
-    FROM wishlist
-    WHERE user_id = ${userId} AND game_id = ${gameId}
-    LIMIT 1
+        SELECT game_id
+        FROM wishlist
+        WHERE user_id = ${userId}
+        AND game_id = ANY(${gameIds})
     `;
 
-    return result.length > 0;
+    const wishlistSet = new Set(result.map((row) => row.game_id));
+    const wishlistStatusByGameId = gameIds.reduce<Record<number, boolean>>(
+        (acc, id) => {
+            acc[id] = wishlistSet.has(Number(id));
+            return acc;
+        },
+        {}
+    );
+
+    return wishlistStatusByGameId;
 }

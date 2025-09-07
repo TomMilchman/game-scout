@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { isGameInUserWishlist } from "@/db/wishlist";
+import { areGamesInUserWishlist } from "@/db/wishlist";
 import GameActions from "@/components/gameActions";
 
 export default async function GamePage({
@@ -33,7 +33,9 @@ export default async function GamePage({
         notFound();
     }
 
-    const isWishlisted = await isGameInUserWishlist(userId, gameId);
+    const isWishlisted = (await areGamesInUserWishlist(userId, [gameId]))[
+        gameId
+    ];
     const { title, steam_app_id, description, release_date, header_image } =
         game;
 

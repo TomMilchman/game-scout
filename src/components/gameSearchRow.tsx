@@ -1,13 +1,15 @@
 import { Game } from "@/app/types";
-import ChangeGameStatus from "./changeGameStatus";
 import Link from "next/link";
+import GameActions from "./gameActions";
 
 export default function GameSearchRow({
-    game,
     userId,
+    game,
+    initialWishlisted,
 }: {
-    game: Game;
     userId: string;
+    game: Game;
+    initialWishlisted: boolean;
 }) {
     const { id, title, release_date, status, capsule_image, header_image } =
         game;
@@ -40,11 +42,12 @@ export default function GameSearchRow({
                 </div>
 
                 {/* Status Selector */}
-                <div className="mt-2 md:mt-4">
-                    <ChangeGameStatus
-                        initialStatus={status || "Never Played"}
-                        gameId={game.id}
+                <div className="mt-2 md:mt-4 mb-6">
+                    <GameActions
                         userId={userId}
+                        gameId={id}
+                        initialStatus={status || "Never Played"}
+                        initialWishlisted={initialWishlisted}
                     />
                 </div>
             </div>

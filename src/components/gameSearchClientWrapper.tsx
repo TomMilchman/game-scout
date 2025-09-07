@@ -12,11 +12,13 @@ type SortOption =
     | "date-desc";
 
 export default function GameSearchClientWrapper({
-    games,
     userId,
+    games,
+    wishlistStatusByGameId,
 }: {
-    games: Game[];
     userId: string;
+    games: Game[];
+    wishlistStatusByGameId: Record<number, boolean>;
 }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortOption, setSortOption] = useState<SortOption>("no-filter");
@@ -86,7 +88,12 @@ export default function GameSearchClientWrapper({
             {/* Results */}
             <div className="flex flex-col gap-2 mx-2.5 mb-2.5">
                 {filteredGames.map((game) => (
-                    <GameSearchRow key={game.id} game={game} userId={userId} />
+                    <GameSearchRow
+                        key={game.id}
+                        game={game}
+                        userId={userId}
+                        initialWishlisted={wishlistStatusByGameId[game.id]}
+                    />
                 ))}
             </div>
         </div>

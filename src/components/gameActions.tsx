@@ -22,7 +22,7 @@ export default function GameActions({
     const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
 
     return (
-        <section className="flex gap-4">
+        <section className="flex gap-4 max-h-2">
             <ChangeGameStatus
                 initialStatus={status}
                 gameId={gameId}

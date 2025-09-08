@@ -45,7 +45,7 @@ export default function GameSearchRow({
                 <div className="mt-2 md:mt-4 mb-6">
                     <GameActions
                         userId={userId}
-                        gameId={id}
+                        game={game}
                         initialStatus={status || "Never Played"}
                         initialWishlisted={initialWishlisted}
                     />

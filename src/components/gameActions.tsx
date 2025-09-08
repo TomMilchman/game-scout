@@ -3,42 +3,49 @@
 import { useState } from "react";
 import ChangeGameStatus from "./changeGameStatus";
 import WishlistButton from "./wishlistButton";
-import { UserGameStatus } from "@/app/types";
+import { Game, UserGameStatus } from "@/app/types";
 
 interface Props {
     initialStatus: UserGameStatus;
     initialWishlisted: boolean;
-    gameId: number;
+    game: Game;
     userId: string;
 }
 
 export default function GameActions({
     initialStatus,
     initialWishlisted,
-    gameId,
+    game,
     userId,
 }: Props) {
     const [status, setStatus] = useState<UserGameStatus>(initialStatus);
     const [isWishlisted, setIsWishlisted] = useState(initialWishlisted);
 
+    const now = new Date();
+    const released = new Date(game.release_date) <= now;
+
     return (
         <section className="flex gap-4 max-h-2">
-            <ChangeGameStatus
-                initialStatus={status}
-                gameId={gameId}
-                userId={userId}
-                onStatusChange={(newStatus) => {
-                    setStatus(newStatus);
+            {released ? (
+                <ChangeGameStatus
+                    initialStatus={status}
+                    gameId={game.id}
+                    userId={userId}
+                    onStatusChange={(newStatus) => {
+                        setStatus(newStatus);
 
-                    if (newStatus !== "Never Played") {
-                        setIsWishlisted(false);
-                    }
-                }}
-            />
+                        if (newStatus !== "Never Played") {
+                            setIsWishlisted(false);
+                        }
+                    }}
+                />
+            ) : (
+                <></>
+            )}
             <WishlistButton
                 status={status}
                 isWishlisted={isWishlisted}
-                gameId={gameId}
+                gameId={game.id}
                 userId={userId}
                 onToggle={(newState) => setIsWishlisted(newState)}
             />

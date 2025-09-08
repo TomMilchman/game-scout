@@ -1,11 +1,12 @@
 import { fetchGamesByIdsOrScrape } from "@/app/server/games";
-import GamePrices from "@/components/gamePrices";
+import GamePricesServer from "@/components/gamePricesServer";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { areGamesInUserWishlist } from "@/db/wishlist";
 import GameActions from "@/components/gameActions";
+import { Suspense } from "react";
+import Spinner from "@/components/spinner";
 
 export default async function GamePage({
     params,
@@ -68,8 +69,14 @@ export default async function GamePage({
             </section>
 
             {/* Game Prices Comparison */}
-            <Suspense>
-                <GamePrices
+            <Suspense
+                fallback={
+                    <div className="flex justify-center items-center h-16">
+                        <Spinner small={true} />
+                    </div>
+                }
+            >
+                <GamePricesServer
                     gameId={gameId}
                     title={title}
                     steamAppId={steam_app_id}
@@ -78,7 +85,7 @@ export default async function GamePage({
 
             {/* Bottom Buttons */}
             <GameActions
-                gameId={game.id}
+                game={game}
                 userId={userId}
                 initialStatus={game.status || "Never Played"}
                 initialWishlisted={isWishlisted}

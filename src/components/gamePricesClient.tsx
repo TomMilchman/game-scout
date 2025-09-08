@@ -1,64 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { fetchPricesForGames } from "@/app/server/games";
-import { GamePriceDetails } from "@/app/types";
 import { FC, SVGProps } from "react";
 import { FaSteam } from "react-icons/fa";
 import { SiGogdotcom } from "react-icons/si";
-import { GMGIcon } from "@/components/gmgIcon";
-import Spinner from "./spinner";
+import { GMGIcon } from "./gmgIcon";
+import { GamePriceDetails } from "@/app/types";
 
-export default function GamePrices({
-    gameId,
-    title,
-    steamAppId,
+export default function GamePricesClient({
+    prices,
 }: {
-    gameId: number;
-    title: string;
-    steamAppId: number;
+    prices: GamePriceDetails[];
 }) {
-    const [prices, setPrices] = useState<GamePriceDetails[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchPrices = async () => {
-            setLoading(true);
-            setError(null);
-
-            const result = await fetchPricesForGames([
-                { gameId, title, steamAppId },
-            ]);
-
-            if (result.success) {
-                setPrices(result.data?.[gameId] ?? []);
-            } else {
-                setPrices([]);
-                setError(result.error ?? "Failed to fetch prices.");
-            }
-
-            setLoading(false);
-        };
-
-        fetchPrices();
-    }, [gameId, steamAppId, title]);
-
-    if (loading) {
+    if (!prices.length)
         return (
-            <div className="flex justify-center items-center h-16">
-                <Spinner small />
-            </div>
+            <p className="flex justify-center mb-3 text-gray-400">
+                No prices available.
+            </p>
         );
-    }
-
-    if (error) {
-        return <p className="text-red-500">{error}</p>;
-    }
-
-    if (prices.length === 0) {
-        return <p className="text-gray-400">No prices available.</p>;
-    }
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">

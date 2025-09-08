@@ -1,12 +1,8 @@
-import type { Page } from "puppeteer";
-import { GamePriceDetails } from "@/app/types";
-import { getCluster } from "@/lib/puppeteer";
-import { generateGameSlug } from "@/utils/generalUtils";
+import { getCluster } from "../lib/puppeteer";
+import { Page } from "puppeteer";
+import { generateGameSlug } from "../utils/utils";
 
-export async function scrapeGogPrice(
-    title: string,
-    gameId: number
-): Promise<GamePriceDetails | null> {
+export async function scrapeGogPrice(title: string, gameId: number) {
     const cluster = await getCluster();
     const slug = generateGameSlug(title, "_");
     const url = `https://www.gog.com/en/game/${slug}`;
@@ -60,7 +56,7 @@ export async function scrapeGogPrice(
                 currency,
                 url,
                 last_updated: new Date(),
-            } as GamePriceDetails;
+            };
         } catch (error) {
             console.warn(`Failed to navigate to ${url}: ${error}`);
             return null;

@@ -1,7 +1,6 @@
-import { GamePriceDetails } from "@/app/types";
-import { getCluster } from "@/lib/puppeteer";
-import { generateGameSlug } from "@/utils/generalUtils";
+import { getCluster } from "../lib/puppeteer";
 import { Page } from "puppeteer";
+import { generateGameSlug } from "../utils/utils";
 
 export async function scrapeGMGPrice(title: string, gameId: number) {
     const cluster = await getCluster();
@@ -78,7 +77,7 @@ export async function scrapeGMGPrice(title: string, gameId: number) {
                 currency,
                 url,
                 last_updated: new Date(),
-            } as GamePriceDetails;
+            };
         } catch (error) {
             console.warn(`Failed to navigate to ${url}: ${error}`);
             return null;

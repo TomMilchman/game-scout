@@ -1,19 +1,18 @@
 "use server";
 
 import { getGamesById, searchGamesByName, upsertGames } from "@/db/games";
-import { scrapeSteamSearch } from "@/services/scrapers/cheerio/steamScraper";
+import { scrapeSteamSearch } from "@/services/steam/steamScraper";
 import { executeAction, normalizeQuery } from "@/utils/generalUtils";
 import {
     fetchSteamPrice,
     fetchSteamGamesDetails,
-} from "@/services/steamAPI/steamApi";
+} from "@/services/steam/steamApi";
 import { ActionResult, Game, GamePriceDetails, UserGameStatus } from "../types";
 import { getPricesForGames, upsertGamePrices } from "@/db/prices";
-import { scrapeGogPrice } from "@/services/scrapers/puppeteer/gogScraper";
-import { scrapeGMGPrice } from "@/services/scrapers/puppeteer/gmgScraper";
 import { GameDetails } from "steamapi";
 import { getUserGameStatus, upsertUserGameStatus } from "@/db/user_games";
 import { addToWishlist, removeFromWishlist } from "@/db/wishlist";
+import { fetchPrice } from "./prices";
 
 const GAME_DETAILS_REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24; // 1 day
 const GAME_PRICE_REFRESH_THRESHOLD_MS = 1000 * 60 * 60; // 1 hour
@@ -164,19 +163,6 @@ export async function fetchPricesForGames(
             ...pricesByGameId,
         };
 
-        // Helper to safely scrape
-        async function safeScrape<T>(
-            fn: () => Promise<T | null>,
-            label: string
-        ): Promise<T | null> {
-            try {
-                return await fn();
-            } catch (err) {
-                console.warn(`${label} scrape failed:`, err);
-                return null;
-            }
-        }
-
         const scrapePromises = gameIdsAndTitles.map(
             async ({ gameId, title, steamAppId }) => {
                 const prices = pricesByGameId[gameId];
@@ -194,23 +180,22 @@ export async function fetchPricesForGames(
 
                 const scrapedPrices: GamePriceDetails[] = [];
 
-                const steamPrice = await safeScrape(
-                    () => fetchSteamPrice(gameId, steamAppId),
-                    "Steam"
-                );
+                const steamPrice = await fetchSteamPrice(gameId, steamAppId);
                 if (steamPrice?.base_price != null)
                     scrapedPrices.push(steamPrice);
 
-                const gogPrice = await safeScrape(
-                    () => scrapeGogPrice(title, gameId),
-                    "GOG"
-                );
+                const gogPrice = await fetchPrice({
+                    store: "GOG",
+                    title,
+                    gameId,
+                });
                 if (gogPrice?.base_price != null) scrapedPrices.push(gogPrice);
 
-                const gmgPrice = await safeScrape(
-                    () => scrapeGMGPrice(title, gameId),
-                    "GreenManGaming"
-                );
+                const gmgPrice = await fetchPrice({
+                    store: "GreenManGaming",
+                    title,
+                    gameId,
+                });
                 if (gmgPrice?.base_price != null) scrapedPrices.push(gmgPrice);
 
                 const validPrices = scrapedPrices.filter(

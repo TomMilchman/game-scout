@@ -5,8 +5,8 @@ let cluster: Cluster | null = null;
 export async function getCluster() {
     if (!cluster) {
         cluster = await Cluster.launch({
-            concurrency: Cluster.CONCURRENCY_CONTEXT,
-            maxConcurrency: 5,
+            concurrency: Cluster.CONCURRENCY_PAGE,
+            maxConcurrency: 3,
             puppeteerOptions: { headless: true },
             timeout: 30000,
         });

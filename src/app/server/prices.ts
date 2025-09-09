@@ -1,3 +1,4 @@
+import { signJwt } from "@/utils/jwtHandler";
 import { GamePriceDetails } from "../types";
 
 type Store = "GreenManGaming" | "GOG";
@@ -17,9 +18,13 @@ export async function fetchPrice({
     title,
     gameId,
 }: FetchPriceOptions): Promise<GamePriceDetails> {
+    const token = signJwt();
     const res = await fetch(`${process.env.SCRAPER_URL}/scrape`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ store, title, gameId }),
     });
     const resObj: ScrapeResult = await res.json();

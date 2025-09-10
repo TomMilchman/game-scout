@@ -32,6 +32,6 @@ export async function fetchPrice({
     if (resObj.success) {
         return resObj.data;
     } else {
-        throw new Error(resObj.error);
+        throw new Error(`On ${store}: ${resObj.error}`);
     }
 }

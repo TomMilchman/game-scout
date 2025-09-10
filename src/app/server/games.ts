@@ -165,45 +165,73 @@ export async function fetchPricesForGames(
 
         const scrapePromises = gameIdsAndTitles.map(
             async ({ gameId, title, steamAppId }) => {
-                const prices = pricesByGameId[gameId];
+                const existingPrices = pricesByGameId[gameId] ?? [];
                 const latestUpdate = Math.max(
-                    ...(prices?.map((p) => p.last_updated?.getTime() ?? 0) ?? [
-                        0,
-                    ])
+                    ...(existingPrices.map(
+                        (p) => p.last_updated?.getTime() ?? 0
+                    ) ?? [0])
                 );
 
                 const needsScrape =
-                    !prices ||
-                    prices.length === 0 ||
+                    !existingPrices ||
+                    existingPrices.length === 0 ||
                     now - latestUpdate > GAME_PRICE_REFRESH_THRESHOLD_MS;
                 if (!needsScrape) return;
 
                 const scrapedPrices: GamePriceDetails[] = [];
 
-                const steamPrice = await fetchSteamPrice(gameId, steamAppId);
-                if (steamPrice?.base_price != null)
-                    scrapedPrices.push(steamPrice);
+                // Scrape each store independently
+                try {
+                    const steamPrice = await fetchSteamPrice(
+                        gameId,
+                        steamAppId
+                    );
+                    if (steamPrice?.base_price != null)
+                        scrapedPrices.push(steamPrice);
+                } catch (err) {
+                    console.warn(
+                        `Steam scrape failed for game ${gameId}:`,
+                        err
+                    );
+                }
 
-                const gogPrice = await fetchPrice({
-                    store: "GOG",
-                    title,
-                    gameId,
-                });
-                if (gogPrice?.base_price != null) scrapedPrices.push(gogPrice);
+                try {
+                    const gogPrice = await fetchPrice({
+                        store: "GOG",
+                        title,
+                        gameId,
+                    });
+                    if (gogPrice?.base_price != null)
+                        scrapedPrices.push(gogPrice);
+                } catch (err) {
+                    console.warn(`GOG scrape failed for game ${gameId}:`, err);
+                }
 
-                const gmgPrice = await fetchPrice({
-                    store: "GreenManGaming",
-                    title,
-                    gameId,
-                });
-                if (gmgPrice?.base_price != null) scrapedPrices.push(gmgPrice);
+                try {
+                    const gmgPrice = await fetchPrice({
+                        store: "GreenManGaming",
+                        title,
+                        gameId,
+                    });
+                    if (gmgPrice?.base_price != null)
+                        scrapedPrices.push(gmgPrice);
+                } catch (err) {
+                    console.warn(`GMG scrape failed for game ${gameId}:`, err);
+                }
 
-                const validPrices = scrapedPrices.filter(
-                    (p) => p && p.game_id != null
-                );
-                if (validPrices.length > 0) {
-                    await upsertGamePrices(validPrices);
-                    updatedPrices[gameId] = validPrices;
+                // Merge scraped + existing prices per store
+                const mergedPrices = [
+                    ...scrapedPrices,
+                    ...existingPrices.filter(
+                        (p) => !scrapedPrices.some((s) => s.store === p.store)
+                    ),
+                ];
+
+                if (mergedPrices.length > 0) {
+                    // Only upsert newly scraped prices
+                    if (scrapedPrices.length > 0)
+                        await upsertGamePrices(scrapedPrices);
+                    updatedPrices[gameId] = mergedPrices;
                 }
             }
         );

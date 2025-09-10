@@ -3,7 +3,7 @@ import GamePricesServer from "@/components/gamePricesServer";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
-import { areGamesInUserWishlist } from "@/db/wishlist";
+import { areGamesInUserWishlist } from "@/db/wishlists";
 import GameActions from "@/components/gameActions";
 import { Suspense } from "react";
 import Spinner from "@/components/spinner";
@@ -60,6 +60,16 @@ export default async function GamePage({
                 </div>
             </div>
 
+            {/* Interactive Elements */}
+            <div className="mb-12">
+                <GameActions
+                    game={game}
+                    userId={userId}
+                    initialStatus={game.status || "Never Played"}
+                    initialWishlisted={isWishlisted}
+                />
+            </div>
+
             {/* Description */}
             <section className="bg-gray-800 rounded-lg p-6 shadow-md mb-6">
                 <h2 className="text-2xl font-semibold text-white mb-3">
@@ -82,14 +92,6 @@ export default async function GamePage({
                     steamAppId={steam_app_id}
                 />
             </Suspense>
-
-            {/* Bottom Buttons */}
-            <GameActions
-                game={game}
-                userId={userId}
-                initialStatus={game.status || "Never Played"}
-                initialWishlisted={isWishlisted}
-            />
         </div>
     );
 }

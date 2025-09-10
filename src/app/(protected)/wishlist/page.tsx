@@ -1,4 +1,4 @@
-import { getWishlist } from "@/db/wishlist";
+import { getWishlist } from "@/db/wishlists";
 import WishlistInteractiveGrid from "@/components/wishlistInteractiveGrid";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";

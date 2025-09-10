@@ -1,6 +1,6 @@
 import { fetchGamesForSearchQuery } from "@/app/server/games";
 import GameSearchClientWrapper from "@/components/gameSearchClientWrapper";
-import { areGamesInUserWishlist } from "@/db/wishlist";
+import { areGamesInUserWishlist } from "@/db/wishlists";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 

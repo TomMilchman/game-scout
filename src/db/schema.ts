@@ -8,6 +8,8 @@ import {
     unique,
     timestamp,
     numeric,
+    smallint,
+    primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const statusEnum = pgEnum("status", [
@@ -30,6 +32,11 @@ export const games = pgTable("games", {
     header_image: text("header_image"),
     capsule_image: text("capsule_image"),
     last_updated: timestamp("last_updated").notNull().defaultNow(),
+    average_rating: numeric("average_rating", {
+        precision: 2,
+        scale: 1,
+    }).default("0"),
+    rating_count: integer("rating_count").default(0),
 });
 
 export const prices = pgTable(
@@ -86,4 +93,18 @@ export const wishlist = pgTable(
         added_at: timestamp("added_at").defaultNow().notNull(),
     },
     (table) => [unique("unique_user_wishlist").on(table.user_id, table.game_id)]
+);
+
+export const gameRatings = pgTable(
+    "game_ratings",
+    {
+        user_id: varchar("user_id").references(() => users.id, {
+            onDelete: "cascade",
+        }),
+        game_id: integer("game_id").references(() => games.id, {
+            onDelete: "cascade",
+        }),
+        user_rating: smallint("user_rating").notNull(),
+    },
+    (table) => [primaryKey({ columns: [table.user_id, table.game_id] })]
 );

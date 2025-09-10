@@ -8,7 +8,13 @@ export async function executeAction<T>(
         return { success: true, data };
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error("Error encountered: ", message);
+
+        if (process.env.NODE_ENV === "development")
+            console.error(
+                `Error: ${message}\nCall stack: ${(error as Error).stack}`
+            );
+        else console.error(`Error:`, message);
+
         return { success: false, error: message };
     }
 }

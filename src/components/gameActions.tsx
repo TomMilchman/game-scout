@@ -4,6 +4,7 @@ import { useState } from "react";
 import ChangeGameStatus from "./changeGameStatus";
 import WishlistButton from "./wishlistButton";
 import { Game, UserGameStatus } from "@/app/types";
+import { InteractiveStarRating } from "./interactiveStarRating";
 
 interface Props {
     initialStatus: UserGameStatus;
@@ -25,7 +26,14 @@ export default function GameActions({
     const released = new Date(game.release_date) <= now;
 
     return (
-        <section className="flex gap-4 max-h-2">
+        <section className="flex gap-4 max-h-2 mb-2">
+            <InteractiveStarRating
+                userId={userId}
+                gameId={game.id}
+                averageRating={Number(game.average_rating)}
+                ratingCount={Number(game.rating_count)}
+                userRating={game.user_rating || 0}
+            />
             {released ? (
                 <ChangeGameStatus
                     initialStatus={status}

@@ -26,6 +26,9 @@ export interface Game {
     status: UserGameStatus | null;
     status_change_date: Date | null;
     last_updated: Date;
+    average_rating: number;
+    rating_count: number;
+    user_rating: number | null;
 }
 
 export type StoreName = "Steam" | "GOG" | "GreenManGaming";
@@ -39,3 +42,5 @@ export interface GamePriceDetails {
     url: string;
     last_updated: Date;
 }
+
+export type Ratings = 1 | 2 | 3 | 4 | 5;

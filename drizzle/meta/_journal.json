@@ -162,6 +162,27 @@
       "when": 1757147708462,
       "tag": "0022_nice_deathbird",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1757500861732,
+      "tag": "0023_woozy_lilith",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1757502107878,
+      "tag": "0024_clumsy_amazoness",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1757520663126,
+      "tag": "0025_left_tomas",
+      "breakpoints": true
     }
   ]
 }

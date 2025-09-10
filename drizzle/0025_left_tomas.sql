@@ -1,0 +1,1 @@
+ALTER TABLE "game_ratings" RENAME COLUMN "rating" TO "user_rating";

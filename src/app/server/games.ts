@@ -11,7 +11,7 @@ import { ActionResult, Game, GamePriceDetails, UserGameStatus } from "../types";
 import { getPricesForGames, upsertGamePrices } from "@/db/prices";
 import { GameDetails } from "steamapi";
 import { getUserGameStatus, upsertUserGameStatus } from "@/db/user_games";
-import { addToWishlist, removeFromWishlist } from "@/db/wishlist";
+import { addToWishlist, removeFromWishlist } from "@/db/wishlists";
 import { fetchPrice } from "./prices";
 
 const GAME_DETAILS_REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24; // 1 day

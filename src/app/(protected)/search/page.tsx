@@ -16,7 +16,15 @@ export default async function SearchPage({
         redirect("/auth/log-in");
     }
 
-    const result = await fetchGamesForSearchQuery(query || "", userId);
+    if (query.length === 0) {
+        return (
+            <div className="text-2xl text-gray-500 italic text-center translate-y-1/2">
+                No search term inserted
+            </div>
+        );
+    }
+
+    const result = await fetchGamesForSearchQuery(query, userId);
 
     if (!result.success) {
         console.error("Failed to fetch games:", result.error);

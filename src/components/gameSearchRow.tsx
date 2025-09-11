@@ -15,10 +15,10 @@ export default function GameSearchRow({
         game;
 
     return (
-        <div className="flex items-center gap-4 bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg transition">
+        <div className="flex flex-col sm:flex-row items-center gap-4 bg-gray-800 rounded-lg p-5 sm:p-4 shadow-md transition">
             {/* Game Image */}
             <Link href={`/game/${id}`}>
-                <div className="w-40 md:w-56 aspect-[2.5/1] flex-shrink-0 rounded-lg overflow-hidden bg-black">
+                <div className="w-64 md:w-56 aspect-[2.5/1] flex-shrink-0 rounded-lg overflow-hidden bg-black">
                     <img
                         src={capsule_image || header_image}
                         alt={title}

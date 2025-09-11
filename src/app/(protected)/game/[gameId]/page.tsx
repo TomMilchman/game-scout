@@ -61,7 +61,7 @@ export default async function GamePage({
             </div>
 
             {/* Interactive Elements */}
-            <div className="mb-12">
+            <div className="mb-16">
                 <GameActions
                     game={game}
                     userId={userId}

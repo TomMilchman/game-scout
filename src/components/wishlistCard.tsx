@@ -39,7 +39,7 @@ export default function WishlistCard({ game, userId, onRemove }: Props) {
                         Release: {game.release_date || "TBD"}
                     </p>
                 </div>
-                <div className="mt-4">
+                <div className="flex items-center justify-center mt-4">
                     <WishlistButton
                         userId={userId}
                         gameId={game.id}

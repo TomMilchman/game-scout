@@ -56,9 +56,9 @@ export default function ChangeGameStatus({
         <div>
             <select
                 className="
-                    bg-gray-700 text-white px-4 py-2 rounded-lg shadow-md
+                    bg-gray-700 text-white px-4 py-1 sm:py-2 rounded-lg shadow-md
                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                    hover:bg-gray-600 transition-colors
+                    hover:bg-gray-600 transition-colors text-xs sm:text-sm
                 "
                 title="Change Status"
                 value={status || "Never Played"}

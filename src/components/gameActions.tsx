@@ -26,7 +26,7 @@ export default function GameActions({
     const released = new Date(game.release_date) <= now;
 
     return (
-        <section className="flex gap-4 max-h-2 mb-2">
+        <section className="flex gap-4 max-h-2 mb-4">
             <InteractiveStarRating
                 userId={userId}
                 gameId={game.id}
@@ -34,29 +34,31 @@ export default function GameActions({
                 ratingCount={Number(game.rating_count)}
                 userRating={game.user_rating || 0}
             />
-            {released ? (
-                <ChangeGameStatus
-                    initialStatus={status}
+            <div className="flex flex-col sm:flex-row text-sm sm:text-base gap-2">
+                {released ? (
+                    <ChangeGameStatus
+                        initialStatus={status}
+                        gameId={game.id}
+                        userId={userId}
+                        onStatusChange={(newStatus) => {
+                            setStatus(newStatus);
+
+                            if (newStatus !== "Never Played") {
+                                setIsWishlisted(false);
+                            }
+                        }}
+                    />
+                ) : (
+                    <></>
+                )}
+                <WishlistButton
+                    status={status}
+                    isWishlisted={isWishlisted}
                     gameId={game.id}
                     userId={userId}
-                    onStatusChange={(newStatus) => {
-                        setStatus(newStatus);
-
-                        if (newStatus !== "Never Played") {
-                            setIsWishlisted(false);
-                        }
-                    }}
+                    onToggle={(newState) => setIsWishlisted(newState)}
                 />
-            ) : (
-                <></>
-            )}
-            <WishlistButton
-                status={status}
-                isWishlisted={isWishlisted}
-                gameId={game.id}
-                userId={userId}
-                onToggle={(newState) => setIsWishlisted(newState)}
-            />
+            </div>
         </section>
     );
 }

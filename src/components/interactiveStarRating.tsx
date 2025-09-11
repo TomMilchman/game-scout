@@ -26,12 +26,26 @@ export function InteractiveStarRating({
 
     const renderStar = (i: number) => {
         if (i <= displayRating)
-            return <FaStar key={i} className="text-yellow-400 text-lg" />;
+            return (
+                <FaStar
+                    key={i}
+                    className="text-yellow-400 text-sm md:text-lg"
+                />
+            );
         else if (i - displayRating < 1)
             return (
-                <FaStarHalfAlt key={i} className="text-yellow-400 text-lg" />
+                <FaStarHalfAlt
+                    key={i}
+                    className="text-yellow-400 text-sm md:text-lg"
+                />
             );
-        else return <FaRegStar key={i} className="text-gray-300 text-lg" />;
+        else
+            return (
+                <FaRegStar
+                    key={i}
+                    className="text-gray-300 text-sm md:text-lg"
+                />
+            );
     };
 
     const handleRate = (rating: Ratings) => {
@@ -42,7 +56,7 @@ export function InteractiveStarRating({
 
     return (
         <div className="flex flex-col gap-1 items-start">
-            <div className="text-gray-400 text-lg">
+            <div className="text-gray-400 text-sm md:text-lg">
                 ⭐ {averageRating.toFixed(1)} ({ratingCount} ratings)
             </div>
             <div className="flex gap-0.5">

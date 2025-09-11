@@ -54,10 +54,10 @@ export default function WishlistButton({
                 onClick={handleClick}
                 disabled={loading}
                 className={`
-                    px-6 py-2 font-semibold rounded-lg shadow-md transition
+                    px-6 py-1 sm:py-2 font-semibold rounded-lg shadow-md transition
                     bg-gray-600 hover:bg-gray-700 text-white
                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                    hover:shadow-lg
+                    hover:shadow-lg text-xs sm:text-sm
                 `}
             >
                 {isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}

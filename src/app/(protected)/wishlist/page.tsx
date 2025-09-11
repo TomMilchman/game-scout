@@ -13,8 +13,10 @@ export default async function WishlistPage() {
     const wishlist = await getWishlist(userId);
 
     return (
-        <div className="max-w-6xl mx-auto p-6">
-            <h1 className="text-4xl font-bold mb-6">Your Wishlist</h1>
+        <div className="max-w-6xl mx-auto px-6 py-8">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-6">
+                Your Wishlist
+            </h1>
             <WishlistInteractiveGrid
                 initialWishlist={wishlist}
                 userId={userId}

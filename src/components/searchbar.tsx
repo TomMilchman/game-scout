@@ -16,7 +16,7 @@ export default function SearchBar() {
     };
 
     return (
-        <div className="flex gap-2 w-full max-w-md mx-auto">
+        <div className="flex gap-2 w-full md:max-w-md sm:max-w-sm mx-auto">
             <input
                 type="search"
                 name="searchBar"
@@ -29,11 +29,18 @@ export default function SearchBar() {
                         handleSearch();
                     }
                 }}
-                className="flex-1 px-4 py-2 rounded-l-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-2 py-1 text-sm rounded-l-md
+                sm:px-4 sm:py-2
+                bg-gray-800 text-white placeholder-gray-400
+                focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
                 onClick={handleSearch}
-                className="px-4 py-2 cursor-pointer bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded-r-lg shadow-md transition flex items-center justify-center"
+                className="px-2 py-1 text-sm rounded-r-md
+                sm:px-4 sm:py-2 sm:text-base
+                bg-purple-700 hover:bg-purple-800
+                text-white font-semibold shadow-md
+                transition flex items-center justify-center"
                 disabled={isPending}
             >
                 {isPending ? (

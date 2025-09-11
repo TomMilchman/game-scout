@@ -9,7 +9,9 @@ type SortOption =
     | "name-asc"
     | "name-desc"
     | "date-asc"
-    | "date-desc";
+    | "date-desc"
+    | "rating-asc"
+    | "rating-desc";
 
 export default function GameSearchClientWrapper({
     userId,
@@ -50,15 +52,19 @@ export default function GameSearchClientWrapper({
                     new Date(b.release_date).getTime() -
                     new Date(a.release_date).getTime()
             );
+        } else if (sortOption === "rating-asc") {
+            result.sort((a, b) => a.average_rating - b.average_rating);
+        } else if (sortOption === "rating-desc") {
+            result.sort((a, b) => b.average_rating - a.average_rating);
         }
 
         return result;
     }, [games, searchTerm, sortOption]);
 
     return (
-        <div className="flex flex-col gap-4 mx-auto max-w-full">
+        <div className="flex flex-col gap-6 mx-auto max-w-full">
             {/* Filter Bar */}
-            <div className="sticky top-16 z-10 bg-gray-950 p-3 rounded-none shadow-md flex flex-wrap items-center gap-3">
+            <div className="sticky text-xs sm:text-base top-20 z-10 bg-gray-950 p-3 rounded-none shadow-md flex flex-wrap items-center gap-3">
                 {/* Search box */}
                 <input
                     type="text"
@@ -75,13 +81,15 @@ export default function GameSearchClientWrapper({
                     onChange={(e) =>
                         setSortOption(e.target.value as SortOption)
                     }
-                    className="px-3 py-2 rounded-md bg-gray-700 text-white"
+                    className="text-xs sm:text-base px-3 py-2 rounded-md bg-gray-700 text-white"
                 >
                     <option value="no-filter">No Filter</option>
                     <option value="name-asc">Name ↑</option>
                     <option value="name-desc">Name ↓</option>
                     <option value="date-asc">Release Date ↑</option>
                     <option value="date-desc">Release Date ↓</option>
+                    <option value="rating-asc">Rating ↑</option>
+                    <option value="rating-desc">Rating ↓</option>
                 </select>
             </div>
 

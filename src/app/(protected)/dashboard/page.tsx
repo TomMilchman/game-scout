@@ -13,8 +13,10 @@ export default async function Dashboard() {
     const gamesByStatus = await getUserGames(userId);
 
     return (
-        <div className="max-w-6xl mx-auto p-6">
-            <h1 className="text-4xl font-bold text-white mb-6">My Games</h1>
+        <div className="max-w-6xl mx-auto py-8 px-6">
+            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+                My Games
+            </h1>
             <StatusSections gamesByStatus={gamesByStatus} userId={userId} />
         </div>
     );

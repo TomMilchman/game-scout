@@ -1,7 +1,7 @@
 "use server";
 
 import sql from "@/lib/db";
-import { Game, UserGameStatus, userGameStatuses } from "@/app/types";
+import { FullGameDetails, UserGameStatus, userGameStatuses } from "@/app/types";
 
 export async function upsertUserGameStatus(
     userId: string,
@@ -27,10 +27,10 @@ export async function getUserGames(userId: string) {
         JOIN games g ON g.id = ug.game_id
         WHERE ug.user_id = ${userId}
         ORDER BY ug.status_change_date DESC
-        ;`) as Game[];
+        ;`) as FullGameDetails[];
 
     // Group by status
-    const grouped = {} as Record<UserGameStatus, Game[]>;
+    const grouped = {} as Record<UserGameStatus, FullGameDetails[]>;
 
     for (const status of userGameStatuses) {
         if (status === "Never Played") continue;

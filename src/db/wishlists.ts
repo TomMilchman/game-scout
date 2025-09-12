@@ -1,6 +1,6 @@
 "use server";
 
-import { Game } from "@/app/types";
+import { FullGameDetails } from "@/app/types";
 import sql from "@/lib/db";
 
 export async function getWishlist(userId: string) {
@@ -9,7 +9,7 @@ export async function getWishlist(userId: string) {
         FROM games g
         JOIN wishlists w on g.id = w.game_id
         WHERE w.user_id = ${userId}
-        ;`) as Game[];
+        ;`) as FullGameDetails[];
 }
 
 export async function addToWishlist(userId: string, gameId: number) {

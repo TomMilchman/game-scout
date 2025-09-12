@@ -7,9 +7,14 @@ import {
     fetchSteamPrice,
     fetchSteamGamesDetails,
 } from "@/services/steam/steamApi";
-import { ActionResult, Game, GamePriceDetails, UserGameStatus } from "../types";
+import {
+    ActionResult,
+    FullGameDetails,
+    GamePriceDetails,
+    PartialGameDetails,
+    UserGameStatus,
+} from "../types";
 import { getPricesForGames, upsertGamePrices } from "@/db/prices";
-import { GameDetails } from "steamapi";
 import { getUserGameStatus, upsertUserGameStatus } from "@/db/user_games";
 import { addToWishlist, removeFromWishlist } from "@/db/wishlists";
 import { fetchPrice } from "./prices";
@@ -23,7 +28,7 @@ const GAME_PRICE_REFRESH_THRESHOLD_MS = 1000 * 60 * 60; // 1 hour
 export async function fetchGamesForSearchQuery(
     query: string,
     userId: string
-): Promise<ActionResult<Game[]>> {
+): Promise<ActionResult<FullGameDetails[]>> {
     return executeAction(async () => {
         query = normalizeQuery(query);
         const limit = 50;
@@ -33,7 +38,7 @@ export async function fetchGamesForSearchQuery(
 
         // Step 3: Determine how many games are missing
         const missingCount = limit - games.length;
-        const gameDetails: GameDetails[] = [];
+        const gameDetails: PartialGameDetails[] = [];
 
         // Step 4: Scrape missing games if needed
         if (missingCount > 0) {
@@ -73,9 +78,11 @@ export async function fetchGamesForSearchQuery(
 }
 
 async function fetchStaleGamesDetails(
-    games: Game[],
+    games: FullGameDetails[],
     updateTime: number
-): Promise<ActionResult<{ steam_app_id: number; details: GameDetails }[]>> {
+): Promise<
+    ActionResult<{ steam_app_id: number; details: PartialGameDetails }[]>
+> {
     return executeAction(async () => {
         const staleGames = games.filter(
             (g) =>
@@ -99,7 +106,7 @@ async function fetchStaleGamesDetails(
 export async function fetchGamesByIdsOrScrape(
     gameIds: number[],
     userId: string
-): Promise<ActionResult<Game[]>> {
+): Promise<ActionResult<FullGameDetails[]>> {
     return executeAction(async () => {
         const now = Date.now();
         const games = await getGamesById(gameIds, userId);
@@ -121,7 +128,7 @@ export async function fetchGamesByIdsOrScrape(
         }
 
         // Map stale games by their ID for easy lookup
-        const staleMap = new Map<number, GameDetails>();
+        const staleMap = new Map<number, PartialGameDetails>();
         updatedStaleGamesDetailsAndIds?.forEach((g) => {
             staleMap.set(g.steam_app_id, g.details);
         });

@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import WishlistCard from "@/components/wishlistCard";
-import { Game } from "@/app/types";
+import { FullGameDetails } from "@/app/types";
 
 interface Props {
-    initialWishlist: Game[];
+    initialWishlist: FullGameDetails[];
     userId: string;
 }
 

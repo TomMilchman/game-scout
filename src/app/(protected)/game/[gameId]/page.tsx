@@ -41,17 +41,17 @@ export default async function GamePage({
         game;
 
     return (
-        <div className="max-w-5xl mx-auto p-6">
+        <div className="max-w-5xl mx-auto mt-6 p-6">
             {/* Game Image + Title + Release Date */}
-            <div className="w-full h-64 md:h-96 relative rounded-lg overflow-hidden shadow-lg mb-6">
+            <div className="w-full h-40 sm:h-64 md:h-96 relative rounded-lg overflow-hidden shadow-lg mb-6">
                 <img
                     src={header_image || ""}
                     alt={title}
                     className="w-full object-cover"
                 />
-                <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/100 to-transparent" />
+                <div className="absolute bottom-0 left-0 w-full h-8/12 sm:h-1/2 bg-gradient-to-t from-black/100 to-transparent" />
                 <div className="absolute bottom-4 left-4 z-10">
-                    <h1 className="text-3xl md:text-5xl font-bold text-white truncate">
+                    <h1 className="text-xl sm:text-3xl md:text-5xl font-bold text-white truncate">
                         {title}
                     </h1>
                     <p className="text-gray-300 mt-1 text-sm md:text-base">
@@ -72,10 +72,12 @@ export default async function GamePage({
 
             {/* Description */}
             <section className="bg-gray-800 rounded-lg p-6 shadow-md mb-6">
-                <h2 className="text-2xl font-semibold text-white mb-3">
+                <h2 className="text-lg sm:text-2xl font-semibold text-white mb-3">
                     Description
                 </h2>
-                <p className="text-gray-300 leading-relaxed">{description}</p>
+                <p className="text-gray-300 leading-relaxed text-sm">
+                    {description}
+                </p>
             </section>
 
             {/* Game Prices Comparison */}

@@ -1,4 +1,4 @@
-import { Game } from "@/app/types";
+import { FullGameDetails } from "@/app/types";
 import Link from "next/link";
 import GameActions from "./gameActions";
 
@@ -8,7 +8,7 @@ export default function GameSearchRow({
     initialWishlisted,
 }: {
     userId: string;
-    game: Game;
+    game: FullGameDetails;
     initialWishlisted: boolean;
 }) {
     const { id, title, release_date, status, capsule_image, header_image } =

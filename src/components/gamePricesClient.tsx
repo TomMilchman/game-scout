@@ -40,28 +40,28 @@ export default function GamePricesClient({
                         href={priceData.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between p-3 bg-gray-700 rounded-lg shadow hover:bg-gray-600 transition"
+                        className="flex items-center justify-between p-3 bg-gray-700 rounded-lg shadow hover:bg-gray-600 transition flex-wrap"
                     >
                         <div className="flex items-center">
-                            {Icon && <Icon className="w-6 h-6 mr-2" />}
-                            <span className="font-semibold text-white">
+                            {Icon && <Icon className="h-6 w-6 mr-2" />}
+                            <span className="text-xs sm:text-base font-semibold text-white">
                                 {priceData.store}
                             </span>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right text-sm sm:text-base">
                             {priceData.current_price < priceData.base_price ? (
                                 <>
-                                    <span className="line-through text-gray-400 mr-2">
+                                    <span className="line-through text-gray-400 mr-2 text-xs sm:text-base">
                                         {priceData.base_price}
                                     </span>
-                                    <span className="text-green-400 font-bold">
+                                    <span className="text-green-400 font-bold text-xs sm:text-base">
                                         {Number(priceData.current_price) === 0
                                             ? "Free"
                                             : priceData.current_price}
                                     </span>
                                 </>
                             ) : (
-                                <span className="text-white">
+                                <span className="text-white text-xs sm:text-base">
                                     {Number(priceData.current_price) === 0
                                         ? "Free"
                                         : priceData.current_price}

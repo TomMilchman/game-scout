@@ -3,13 +3,13 @@
 import { useState } from "react";
 import ChangeGameStatus from "./changeGameStatus";
 import WishlistButton from "./wishlistButton";
-import { Game, UserGameStatus } from "@/app/types";
+import { FullGameDetails, UserGameStatus } from "@/app/types";
 import { InteractiveStarRating } from "./interactiveStarRating";
 
 interface Props {
     initialStatus: UserGameStatus;
     initialWishlisted: boolean;
-    game: Game;
+    game: FullGameDetails;
     userId: string;
 }
 

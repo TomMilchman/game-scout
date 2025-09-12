@@ -15,7 +15,7 @@ export const userGameStatuses = [
 
 export type UserGameStatus = (typeof userGameStatuses)[number];
 
-export interface Game {
+export interface FullGameDetails {
     id: number;
     steam_app_id: number;
     title: string;
@@ -30,6 +30,16 @@ export interface Game {
     rating_count: number;
     user_rating: number | null;
 }
+
+export type PartialGameDetails = Omit<
+    FullGameDetails,
+    | "status"
+    | "status_change_date"
+    | "last_updated"
+    | "average_rating"
+    | "rating_count"
+    | "user_rating"
+>;
 
 export type StoreName = "Steam" | "GOG" | "GreenManGaming";
 

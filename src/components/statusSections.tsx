@@ -1,12 +1,12 @@
 "use client";
 
-import { Game, UserGameStatus } from "@/app/types";
+import { FullGameDetails, UserGameStatus } from "@/app/types";
 import Link from "next/link";
 import { useState } from "react";
 import ChangeGameStatus from "./changeGameStatus";
 
 type Props = {
-    gamesByStatus: Record<UserGameStatus, Game[]>;
+    gamesByStatus: Record<UserGameStatus, FullGameDetails[]>;
     userId: string;
 };
 
@@ -55,7 +55,7 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
                         </p>
                     ) : (
                         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {games.map((game: Game) => (
+                            {games.map((game: FullGameDetails) => (
                                 <div
                                     key={game.id}
                                     className="bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"

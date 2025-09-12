@@ -1,6 +1,6 @@
 "use client";
 
-import { Game } from "@/app/types";
+import { FullGameDetails } from "@/app/types";
 import GameSearchRow from "./gameSearchRow";
 import { useState, useMemo } from "react";
 
@@ -19,7 +19,7 @@ export default function GameSearchClientWrapper({
     wishlistStatusByGameId,
 }: {
     userId: string;
-    games: Game[];
+    games: FullGameDetails[];
     wishlistStatusByGameId: Record<number, boolean>;
 }) {
     const [searchTerm, setSearchTerm] = useState("");

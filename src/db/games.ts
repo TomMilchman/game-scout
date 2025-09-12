@@ -1,8 +1,7 @@
 "use server";
 
 import sql from "@/lib/db";
-import { GameDetails } from "steamapi";
-import { Game } from "@/app/types";
+import { FullGameDetails, PartialGameDetails } from "@/app/types";
 
 const normalize = (gameName: string) => gameName.replace(/[\s-]+/g, "%");
 
@@ -19,7 +18,7 @@ export async function getGamesById(gameIds: number[], userId: string) {
         WHERE g.id = ANY(${gameIds});
         `;
 
-    const games: Game[] = rows.map((r) => ({
+    const games: FullGameDetails[] = rows.map((r) => ({
         id: r.id,
         steam_app_id: r.steam_app_id,
         title: r.title,
@@ -56,19 +55,19 @@ export async function searchGamesByName(
             AND r.user_id = ${userId}
         WHERE g.title ILIKE ${"%" + normalized + "%"}
         LIMIT ${limit};
-        `) as Game[];
+        `) as FullGameDetails[];
 }
 
-export async function upsertGames(games: GameDetails[]) {
+export async function upsertGames(games: PartialGameDetails[]) {
     await Promise.all(
         games.map(
             (game) =>
                 sql`
                     INSERT INTO games (steam_app_id, title, description, release_date, header_image, capsule_image, last_updated, average_rating, rating_count)
-                    VALUES (${game.id}, ${game.name}, ${
-                    game.shortDescription
-                }, ${game.releaseDate?.date}, ${game.headerImage}, ${
-                    game.capsuleImage
+                    VALUES (${game.id}, ${game.title}, ${game.description}, ${
+                    game.release_date
+                }, ${game.header_image}, ${
+                    game.capsule_image
                 }, ${new Date()}, 0, 0)
                     ON CONFLICT (steam_app_id) DO
                     UPDATE SET

@@ -1,11 +1,11 @@
 "use client";
 
-import { Game } from "@/app/types";
+import { FullGameDetails } from "@/app/types";
 import WishlistButton from "./wishlistButton";
 import Link from "next/link";
 
 interface Props {
-    game: Game;
+    game: FullGameDetails;
     userId: string;
     onRemove?: (gameId: number) => void;
 }

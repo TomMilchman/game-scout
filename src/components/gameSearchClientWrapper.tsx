@@ -64,7 +64,7 @@ export default function GameSearchClientWrapper({
     return (
         <div className="flex flex-col gap-6 mx-auto max-w-full">
             {/* Filter Bar */}
-            <div className="sticky text-xs sm:text-base top-20 z-10 bg-gray-950 p-3 rounded-none shadow-md flex flex-wrap items-center gap-3">
+            <div className="sticky text-xs sm:text-base top-20 sm:top-16 z-10 bg-gray-950 p-3 rounded-none shadow-md flex flex-wrap items-center gap-3">
                 {/* Search box */}
                 <input
                     type="text"

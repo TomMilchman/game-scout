@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { fetchGamesByIdsOrScrape } from "@/app/server/games";
 import GamePricesServer from "@/components/gamePricesServer";
 import { auth } from "@clerk/nextjs/server";

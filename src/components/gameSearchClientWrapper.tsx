@@ -35,7 +35,7 @@ export default function GameSearchClientWrapper({
         }
 
         if (sortOption === "no-filter") {
-            return games;
+            return result;
         } else if (sortOption === "name-asc") {
             result.sort((a, b) => a.title.localeCompare(b.title));
         } else if (sortOption === "name-desc") {

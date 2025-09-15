@@ -23,23 +23,23 @@ export default function WishlistCard({ game, userId, onRemove }: Props) {
                 <img
                     src={game.header_image || ""}
                     alt={game.title}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-24 sm:h-48 object-cover"
                 />
             </Link>
 
-            <div className="p-4 flex flex-col justify-between h-48">
+            <div className="p-4 flex flex-col justify-between h-40 sm:h-48">
                 <div>
                     <Link href={`/game/${game.id}`}>
-                        <h2 className="text-xl font-semibold text-white hover:underline">
+                        <h2 className="text-base sm:text-xl font-semibold text-white hover:underline truncate">
                             {game.title}
                         </h2>
                     </Link>
 
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-gray-400 text-xs sm:text-sm">
                         Release: {game.release_date || "TBD"}
                     </p>
                 </div>
-                <div className="flex items-center justify-center mt-4">
+                <div className="mx-auto">
                     <WishlistButton
                         userId={userId}
                         gameId={game.id}

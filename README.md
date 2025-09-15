@@ -4,6 +4,8 @@ Game Scout is a full-stack web application that helps users track video game pri
 
 Built with Next.js, React, and PostgreSQL, it integrates with an external Puppeteer-based scraper ([Game Scout Scraper Service](https://github.com/TomMilchman/game-scout-scraper-service)) to fetch prices from stores without public APIs, providing an intuitive, responsive interface for gamers.
 
+[Video showcase](https://www.youtube.com/watch?v=TBwJrO03R2U)
+
 ---
 
 ## Table of Contents

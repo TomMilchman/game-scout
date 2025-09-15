@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Game Scout
+
+Game Scout is a full-stack web application that helps users track video game prices across multiple digital stores, manage wishlists, and monitor their gameplay statuses. 
+
+Built with Next.js, React, and PostgreSQL, it integrates with an external Puppeteer-based scraper ([Game Scout Scraper Service](https://github.com/TomMilchman/game-scout-scraper-service)) to fetch prices from stores without public APIs, providing an intuitive, responsive interface for gamers.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+
+---
+
+## Features
+
+- **User Authentication**: Account creation and login using Clerk.
+- **Wishlist Management**: Add, remove, and manage games on your wishlist.
+- **Game Tracking**: Track gameplay status: playing, finished, completed, on-hold, dropped, or never played.
+- **Price Comparison**: View prices from multiple stores including Steam, GOG, and GreenManGaming.
+- **On-demand Price Scraping**: Fetch prices dynamically for stores without public APIs.
+- **Responsive UI**: Mobile-friendly and desktop-ready interface.
+- **Server Actions**: Efficient data fetching and server-side operations.
+
+---
+
+## Tech Stack
+
+- **Frontend**: Next.js (App Router), React, TailwindCSS
+- **Backend**: Next.js API Routes / Server Actions
+- **Database**: PostgreSQL (accessed via `@neondatabase/serverless` npm package)
+- **Authentication**: Clerk
+- **Scraping**: Cheerio, Puppeteer (external project)
+- **Other**: TypeScript, Node.js
+
+---
+
+## Architecture
+
+1. **Frontend**: Next.js App Router with React components. Data fetching is done using Server Actions.
+2. **Backend**: Server Actions that handle mutations and access PostgreSQL.
+3. **Scrapers**: Puppeteer scrapers fetch game prices on-demand via the external scraper service. Steam API is used where available.
+4. **Database**: PostgreSQL stores users, wishlists, game tracking data, ratings, and cached price information.
+   
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js >= 20
+- PostgreSQL
+- Yarn or npm
+- Clerk account for authentication
+- [Game Scout Scraper Service](https://github.com/TomMilchman/game-scout-scraper-service) running locally or deployed for fetching prices from GOG and GreenManGaming.
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/TomMilchman/GameScout.git
+cd GameScout
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Set up environment variables:
+
+  Create a .env file in the root directory with:
+  
+  ```env
+  DATABASE_URL=<url>
+  SCRAPER_URL=<url-of-scraping-service>
+  CLERK_SECRET_KEY=<key>
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<key>
+  CLERK_WEBHOOK_SIGNING_SECRET=<key>
+  STEAM_API_KEY=<your_steam_api_key>
+  NODE_ENV=<development|production>
+  ```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 to view the app in the browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Usage
 
-## Learn More
+1. Register a new account or log in via Clerk.
 
-To learn more about Next.js, take a look at the following resources:
+2. Browse or search for games to add to your wishlist.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Track your gameplay status for each game.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. Check current prices across supported stores.
 
-## Deploy on Vercel
+5. Use the on-demand scraping feature to fetch the latest prices from stores (available stores: Steam, GOG, GreenManGaming).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Structure
+
+```text
+/app           - Next.js App Router pages and components
+  /(protected)     - Protected pages
+    /dashboard        - Dashboard with game tracking
+    /game/[gameId]    - Game details with price comparison
+    /search           - Search results page
+    /wishlist         - Wishlist page
+  /api/webhooks    - Clerk webhook endpoints
+  /auth            - Login/Register pages
+  /components      - Reusable TSX components
+  /lib             - API helpers and utilities
+  /server          - Server actions and backend logic
+  /db              - SQL queries and DB interactions
+  /services        - Steam API and other service integrations
+  /utils           - Misc utility functions
+/public        - Static assets and images
+```

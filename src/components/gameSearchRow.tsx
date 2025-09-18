@@ -3,11 +3,9 @@ import Link from "next/link";
 import GameActions from "./gameActions";
 
 export default function GameSearchRow({
-    userId,
     game,
     initialWishlisted,
 }: {
-    userId: string;
     game: FullGameDetails;
     initialWishlisted: boolean;
 }) {
@@ -44,7 +42,6 @@ export default function GameSearchRow({
                 {/* Game Actions */}
                 <div className="mt-2 md:mt-4 mb-6">
                     <GameActions
-                        userId={userId}
                         game={game}
                         initialStatus={status || "Never Played"}
                         initialWishlisted={initialWishlisted}

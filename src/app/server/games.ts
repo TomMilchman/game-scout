@@ -12,12 +12,19 @@ import {
     FullGameDetails,
     GamePriceDetails,
     PartialGameDetails,
+    Ratings,
     UserGameStatus,
 } from "../types";
 import { getPricesForGames, upsertGamePrices } from "@/db/prices";
 import { getUserGameStatus, upsertUserGameStatus } from "@/db/user_games";
-import { addToWishlist, removeFromWishlist } from "@/db/wishlists";
+import {
+    addToWishlist,
+    areGamesInUserWishlist,
+    removeFromWishlist,
+} from "@/db/wishlists";
 import { fetchPrice } from "./prices";
+import { auth } from "@clerk/nextjs/server";
+import { upsertUserRating } from "@/db/game_ratings";
 
 const GAME_DETAILS_REFRESH_THRESHOLD_MS = 1000 * 60 * 60 * 24; // 1 day
 const GAME_PRICE_REFRESH_THRESHOLD_MS = 1000 * 60 * 60; // 1 hour
@@ -26,10 +33,12 @@ const GAME_PRICE_REFRESH_THRESHOLD_MS = 1000 * 60 * 60; // 1 hour
  * Fetch games for a search query (metadata only), handling missing and stale separately.
  */
 export async function fetchGamesForSearchQuery(
-    query: string,
-    userId: string
+    query: string
 ): Promise<ActionResult<FullGameDetails[]>> {
     return executeAction(async () => {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Forbidden");
+
         query = normalizeQuery(query);
         const limit = 50;
 
@@ -104,10 +113,12 @@ async function fetchStaleGamesDetails(
 }
 
 export async function fetchGamesByIdsOrScrape(
-    gameIds: number[],
-    userId: string
+    gameIds: number[]
 ): Promise<ActionResult<FullGameDetails[]>> {
     return executeAction(async () => {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Forbidden");
+
         const now = Date.now();
         const games = await getGamesById(gameIds, userId);
 
@@ -249,13 +260,15 @@ export async function fetchPricesForGames(
 }
 
 export async function changeUserGameStatus(
-    userId: string,
     gameId: number,
     prevStatus: UserGameStatus,
     newStatus: UserGameStatus,
     changeDate: Date
 ): Promise<ActionResult<void>> {
     return executeAction(async () => {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Forbidden");
+
         if (prevStatus === "Never Played") {
             await removeFromWishlist(userId, gameId);
         }
@@ -265,11 +278,13 @@ export async function changeUserGameStatus(
 }
 
 export async function toggleWishlist(
-    userId: string,
     gameId: number,
     enabled: boolean
 ): Promise<ActionResult<boolean>> {
     return executeAction(async () => {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Forbidden");
+
         const status = await getUserGameStatus(userId, gameId);
 
         if (status !== "Never Played") {
@@ -285,5 +300,23 @@ export async function toggleWishlist(
             await addToWishlist(userId, gameId);
             return true;
         }
+    });
+}
+
+export async function rateGame(gameId: number, userRating: Ratings) {
+    return executeAction(async () => {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Forbidden");
+
+        await upsertUserRating(userId, gameId, userRating);
+    });
+}
+
+export async function checkIfGameIdsInUserWishlist(gameIds: number[]) {
+    return executeAction(async () => {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Forbidden");
+
+        await areGamesInUserWishlist(userId, gameIds);
     });
 }

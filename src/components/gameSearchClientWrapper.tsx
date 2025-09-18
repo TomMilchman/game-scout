@@ -14,11 +14,9 @@ type SortOption =
     | "rating-desc";
 
 export default function GameSearchClientWrapper({
-    userId,
     games,
     wishlistStatusByGameId,
 }: {
-    userId: string;
     games: FullGameDetails[];
     wishlistStatusByGameId: Record<number, boolean>;
 }) {
@@ -99,7 +97,6 @@ export default function GameSearchClientWrapper({
                     <GameSearchRow
                         key={game.id}
                         game={game}
-                        userId={userId}
                         initialWishlisted={wishlistStatusByGameId[game.id]}
                     />
                 ))}

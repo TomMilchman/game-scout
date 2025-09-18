@@ -52,19 +52,19 @@ export default function GamePricesClient({
                             {priceData.current_price < priceData.base_price ? (
                                 <>
                                     <span className="line-through text-gray-400 mr-2 text-xs sm:text-base">
-                                        {priceData.base_price}
+                                        ${priceData.base_price}
                                     </span>
                                     <span className="text-green-400 font-bold text-xs sm:text-base">
                                         {Number(priceData.current_price) === 0
                                             ? "Free"
-                                            : priceData.current_price}
+                                            : "$" + priceData.current_price}
                                     </span>
                                 </>
                             ) : (
                                 <span className="text-white text-xs sm:text-base">
                                     {Number(priceData.current_price) === 0
                                         ? "Free"
-                                        : priceData.current_price}
+                                        : "$" + priceData.current_price}
                                 </span>
                             )}
                         </div>

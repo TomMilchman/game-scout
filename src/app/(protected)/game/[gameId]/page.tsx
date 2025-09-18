@@ -22,7 +22,7 @@ export default async function GamePage({
         redirect("/auth/log-in");
     }
 
-    const result = await fetchGamesByIdsOrScrape([gameId], userId);
+    const result = await fetchGamesByIdsOrScrape([gameId]);
 
     if (!result.success) {
         console.error("Failed to fetch game:", result.error);
@@ -66,7 +66,6 @@ export default async function GamePage({
             <div className="mb-16">
                 <GameActions
                     game={game}
-                    userId={userId}
                     initialStatus={game.status || "Never Played"}
                     initialWishlisted={isWishlisted}
                 />

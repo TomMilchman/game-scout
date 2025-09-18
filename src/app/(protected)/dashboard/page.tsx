@@ -14,7 +14,7 @@ export default async function Dashboard() {
 
     return (
         <div className="max-w-6xl mx-auto py-8 sm:pt-2 sm:pb-6 px-6">
-            <StatusSections gamesByStatus={gamesByStatus} userId={userId} />
+            <StatusSections gamesByStatus={gamesByStatus} />
         </div>
     );
 }

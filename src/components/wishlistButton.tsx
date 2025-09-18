@@ -6,7 +6,6 @@ import { useState } from "react";
 
 interface WishlistButtonProps {
     gameId: number;
-    userId: string;
     status: UserGameStatus;
     isWishlisted: boolean;
     onToggle?: (newState: boolean) => void;
@@ -14,7 +13,6 @@ interface WishlistButtonProps {
 
 export default function WishlistButton({
     gameId,
-    userId,
     status,
     isWishlisted,
     onToggle,
@@ -27,7 +25,7 @@ export default function WishlistButton({
         setLoading(true);
 
         try {
-            const result = await toggleWishlist(userId, gameId, isWishlisted);
+            const result = await toggleWishlist(gameId, isWishlisted);
 
             if (!result.success) {
                 throw new Error(result.error ?? "Failed to toggle wishlist");

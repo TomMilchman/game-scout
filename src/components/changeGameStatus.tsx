@@ -6,12 +6,10 @@ import { useState } from "react";
 
 export default function ChangeGameStatus({
     initialStatus,
-    userId,
     gameId,
     onStatusChange,
 }: {
     initialStatus: UserGameStatus;
-    userId: string;
     gameId: number;
     onStatusChange?: (newStatus: UserGameStatus, changeDate: Date) => void;
 }) {
@@ -30,7 +28,6 @@ export default function ChangeGameStatus({
 
         try {
             const result = await changeUserGameStatus(
-                userId,
                 gameId,
                 prevStatus,
                 newStatus,

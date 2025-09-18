@@ -1,11 +1,10 @@
 "use client";
+import { rateGame } from "@/app/server/games";
 import { Ratings } from "@/app/types";
-import { upsertUserRating } from "@/db/game_ratings";
 import { startTransition, useState } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 
 interface InteractiveStarRatingProps {
-    userId: string;
     gameId: number;
     averageRating: number;
     ratingCount: number;
@@ -13,7 +12,6 @@ interface InteractiveStarRatingProps {
 }
 
 export function InteractiveStarRating({
-    userId,
     gameId,
     averageRating,
     ratingCount,
@@ -50,7 +48,7 @@ export function InteractiveStarRating({
 
     const handleRate = (rating: Ratings) => {
         startTransition(() => {
-            upsertUserRating(userId, gameId, rating);
+            rateGame(gameId, rating);
         });
     };
 

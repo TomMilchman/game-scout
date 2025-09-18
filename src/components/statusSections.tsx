@@ -7,10 +7,9 @@ import ChangeGameStatus from "./changeGameStatus";
 
 type Props = {
     gamesByStatus: Record<UserGameStatus, FullGameDetails[]>;
-    userId: string;
 };
 
-export default function StatusSections({ gamesByStatus, userId }: Props) {
+export default function StatusSections({ gamesByStatus }: Props) {
     const [groups, setGroups] = useState(gamesByStatus);
     const [activeStatus, setActiveStatus] = useState<UserGameStatus>("Playing");
 
@@ -115,7 +114,6 @@ export default function StatusSections({ gamesByStatus, userId }: Props) {
                                             game.status || "Never Played"
                                         }
                                         gameId={game.id}
-                                        userId={userId}
                                         onStatusChange={(
                                             newStatus,
                                             changeDate

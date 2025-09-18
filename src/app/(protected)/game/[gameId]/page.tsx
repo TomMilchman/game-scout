@@ -1,11 +1,11 @@
 export const dynamic = "force-dynamic";
 
-import { fetchGamesByIdsOrScrape } from "@/app/server/games";
+import {
+    checkIfGameIdsInUserWishlist,
+    fetchGamesByIdsOrScrape,
+} from "@/app/server/games";
 import GamePricesServer from "@/components/gamePricesServer";
-import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
-import { redirect } from "next/navigation";
-import { areGamesInUserWishlist } from "@/db/wishlists";
 import GameActions from "@/components/gameActions";
 import { Suspense } from "react";
 import Spinner from "@/components/spinner";
@@ -16,29 +16,35 @@ export default async function GamePage({
     params: Promise<{ gameId: number }>;
 }) {
     const { gameId } = await params;
-    const { userId } = await auth();
 
-    if (!userId) {
-        redirect("/auth/log-in");
-    }
+    const fetchGameResult = await fetchGamesByIdsOrScrape([gameId]);
 
-    const result = await fetchGamesByIdsOrScrape([gameId]);
-
-    if (!result.success) {
-        console.error("Failed to fetch game:", result.error);
+    if (!fetchGameResult.success) {
+        console.error("Failed to fetch game:", fetchGameResult.error);
         notFound();
     }
 
-    const game = result.data?.[0];
+    const game = fetchGameResult.data?.[0];
 
     if (!game) {
         console.warn("Game not found for id:", gameId);
         notFound();
     }
 
-    const isWishlisted = (await areGamesInUserWishlist(userId, [gameId]))[
-        gameId
-    ];
+    const isWishlistedResult = await checkIfGameIdsInUserWishlist([gameId]);
+
+    let initialWishlisted: boolean | null = null;
+
+    if (isWishlistedResult.success) {
+        initialWishlisted = isWishlistedResult.data?.[gameId] ?? false;
+    } else {
+        console.error(
+            `Error fetching wishlist status for game ID ${gameId}: ${isWishlistedResult.error}`
+        );
+
+        initialWishlisted = null;
+    }
+
     const { title, steam_app_id, description, release_date, header_image } =
         game;
 
@@ -67,7 +73,7 @@ export default async function GamePage({
                 <GameActions
                     game={game}
                     initialStatus={game.status || "Never Played"}
-                    initialWishlisted={isWishlisted}
+                    initialWishlisted={initialWishlisted}
                 />
             </div>
 

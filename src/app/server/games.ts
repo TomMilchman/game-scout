@@ -308,7 +308,7 @@ export async function rateGame(gameId: number, userRating: Ratings) {
         const { userId } = await auth();
         if (!userId) throw new Error("Forbidden");
 
-        await upsertUserRating(userId, gameId, userRating);
+        return await upsertUserRating(userId, gameId, userRating);
     });
 }
 
@@ -317,6 +317,6 @@ export async function checkIfGameIdsInUserWishlist(gameIds: number[]) {
         const { userId } = await auth();
         if (!userId) throw new Error("Forbidden");
 
-        await areGamesInUserWishlist(userId, gameIds);
+        return await areGamesInUserWishlist(userId, gameIds);
     });
 }

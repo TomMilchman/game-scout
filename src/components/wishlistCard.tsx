@@ -10,7 +10,7 @@ interface Props {
     onRemove?: (gameId: number) => void;
 }
 
-export default function WishlistCard({ game, userId, onRemove }: Props) {
+export default function WishlistCard({ game, onRemove }: Props) {
     const handleToggle = (newState: boolean) => {
         if (!newState && onRemove) {
             onRemove(game.id);
@@ -41,7 +41,6 @@ export default function WishlistCard({ game, userId, onRemove }: Props) {
                 </div>
                 <div className="mx-auto">
                     <WishlistButton
-                        userId={userId}
                         gameId={game.id}
                         status={game.status || "Never Played"}
                         isWishlisted={true}

@@ -34,13 +34,15 @@ export default async function SearchPage({
     const games = result.data ?? [];
     const gameIds = games.map((g) => g.id);
 
-    const wishlistStatusByGameId = await checkIfGameIdsInUserWishlist(gameIds);
+    const wishlistStatusByGameIdResult = await checkIfGameIdsInUserWishlist(
+        gameIds
+    );
 
     return (
         <div>
             <GameSearchClientWrapper
                 games={games}
-                wishlistStatusByGameId={wishlistStatusByGameId}
+                wishlistStatusByGameId={wishlistStatusByGameIdResult.data ?? {}}
             />
         </div>
     );

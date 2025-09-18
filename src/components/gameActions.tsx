@@ -8,7 +8,7 @@ import { InteractiveStarRating } from "./interactiveStarRating";
 
 interface Props {
     initialStatus: UserGameStatus;
-    initialWishlisted: boolean;
+    initialWishlisted: boolean | null;
     game: FullGameDetails;
 }
 
